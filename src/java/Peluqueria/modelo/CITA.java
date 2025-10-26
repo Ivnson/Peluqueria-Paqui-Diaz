@@ -12,16 +12,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+//import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
 //import java.sql.Time;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+//import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -32,65 +38,71 @@ import java.util.List;
 public class CITA implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "Fecha", nullable = false)
-    public Date Fecha;
+    private LocalDate fecha;  // <-- Cambio a camelCase
 
-    @Temporal(TemporalType.TIME)
+    
     @Column(name = "HoraInicio", nullable = false)
-    private Date HoraInicio;
+    private LocalTime horaInicio;  // <-- Cambio a camelCase
 
     //RELACION 1---1 (UNA CITA PERTENECE SOLO A UN USUARIO Y UN USUARIO SOLO TIENE UNA CITA
+    // CORRECCIÓN: Nombre del campo en minúscula para seguir convención Java
     @OneToOne
-    @JoinColumn(name = "Usuario", unique = true, nullable = false)
-    private USUARIO Usuario;
+    @JoinColumn(name = "usuario_id", unique = true, nullable = false)
+    private USUARIO usuario;  // <-- Cambio a camelCase
 
-    @OneToMany(mappedBy = "idCita", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<CITA_SERVICIO> cita_servicios = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "Cita_Servicio",
+            joinColumns = @JoinColumn(name = "idCita", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "idServicio", referencedColumnName = "id")
+    )
+    private Set<SERVICIO> serviciosSet = new HashSet<>();
 
     public CITA() {
     }
 
-    public CITA(Date Fecha, Date HoraInicio, USUARIO Usuario) {
-        this.Fecha = Fecha;
-        this.HoraInicio = HoraInicio;
-        this.Usuario = Usuario;
+    public CITA(LocalDate Fecha, LocalTime HoraInicio, USUARIO Usuario) {
+        this.fecha = Fecha;
+        this.horaInicio = HoraInicio;
+        this.usuario = Usuario;
     }
 
-    public Date getFecha() {
-        return Fecha;
+    public LocalDate getFecha() {
+        return fecha;
     }
 
     public USUARIO getUsuario() {
-        return Usuario;
+        return usuario;
     }
 
     public void setUsuario(USUARIO Usuario) {
-        this.Usuario = Usuario;
+        this.usuario = Usuario;
     }
 
-    public void setFecha(Date Fecha) {
-        this.Fecha = Fecha;
+    public void setFecha(LocalDate Fecha) {
+        this.fecha = Fecha;
     }
 
-    public Date getHoraInicio() {
-        return HoraInicio;
+    public LocalTime getHoraInicio() {
+        return horaInicio;
     }
 
-    public void setHoraInicio(Date HoraInicio) {
-        this.HoraInicio = HoraInicio;
+    public void setHoraInicio(LocalTime HoraInicio) {
+        this.horaInicio = HoraInicio;
     }
 
-    public List<CITA_SERVICIO> getCita_servicios() {
-        return cita_servicios;
+    public Set<SERVICIO> getServiciosSet() {
+        return serviciosSet;
     }
 
-    public void setCita_servicios(List<CITA_SERVICIO> cita_servicios) {
-        this.cita_servicios = cita_servicios;
+    public void setServiciosSet(Set<SERVICIO> serviciosSet) {
+        this.serviciosSet = serviciosSet;
     }
 
     public Long getId() {

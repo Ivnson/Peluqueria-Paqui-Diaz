@@ -11,15 +11,18 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+//import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+//import jakarta.persistence.OneToMany;
+//import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+//import java.sql.Time;
+//import java.util.ArrayList;
+//import java.util.Date;
+import java.util.HashSet;
+//import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -32,8 +35,8 @@ public class SERVICIO implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id ; 
-    
+    private Long id;
+
     @Column(name = "NombreServicio", nullable = false, length = 100, unique = true)
     private String NombreServicio;
 
@@ -46,8 +49,8 @@ public class SERVICIO implements Serializable {
     @Column(name = "Precio", nullable = false)
     private float Precio;
 
-    @OneToMany(mappedBy = "idServicio", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<CITA_SERVICIO> Cita_servicio = new ArrayList<>();
+    @ManyToMany(mappedBy = "serviciosSet", fetch = FetchType.LAZY)
+    private Set<CITA> citasSet = new HashSet<>();
 
     public SERVICIO() {
     }
@@ -91,12 +94,12 @@ public class SERVICIO implements Serializable {
         this.Precio = Precio;
     }
 
-    public List<CITA_SERVICIO> getCita_servicio() {
-        return Cita_servicio;
+    public Set<CITA> getCitas() {
+        return citasSet;
     }
 
-    public void setCita_servicio(List<CITA_SERVICIO> Cita_servicio) {
-        this.Cita_servicio = Cita_servicio;
+    public void setCitas(Set<CITA> citas) {
+        this.citasSet = citas;
     }
 
     public Long getId() {

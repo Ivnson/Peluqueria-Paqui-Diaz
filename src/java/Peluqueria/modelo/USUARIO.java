@@ -17,6 +17,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -24,89 +25,86 @@ import java.util.Date;
  * @author ivan
  */
 @Entity
-@Table(name = "Usuario")
+@Table(name = "usuarios")
 public class USUARIO implements Serializable {
-
+    
     private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    
-    @Column(name = "NombreCompleto", nullable = false) //NULLABLE = FALSE PARA QUE EL VALOR SEA OBLIGATORIO
-    private String NombreCompleto;
+    @Column(name = "NombreCompleto", nullable = false)
+    private String nombreCompleto;  // <-- Cambio a camelCase
 
-
-    //UNA PERSONA PARA REGISTRARSE NECESITA EL NOMBRE, EMAIL Y TELEFONO    
-    //LE QUITO EL UNIQUE PARA HACER PRUEBAS
-    @Column(name = "Email", nullable = false)//CON UNIQUE NO SE PERMITEN VALORES DUPLICADOS 
-    private String Email;
+    //le pongo el UNIQUE despues de hacer pruebas 
+    @Column(name = "Email", nullable = false)
+    private String email;  // <-- Cambio a camelCase
     
-    //UNA PERSONA SE INICIA SESION GRACIAS AL TELEFONO 
-    //Y SE LE ENVIA UN SMS DE CONFIRMACION
-    //LE QUITO EL UNIQUE PARA HACER PRUEBAS
+    //le pongo el UNIQUE despues de hacer pruebas 
     @Column(name = "Telefono", nullable = false, length = 12)
-    private Long Telefono;
+    private Long telefono;  // <-- Cambio a camelCase
 
-    @Temporal(TemporalType.DATE)
+    
     @Column(name = "FechaRegistro", nullable = false)
-    private Date FechaRegistro;
+    private LocalDate fechaRegistro;  // <-- Cambio a camelCase
 
     @Column(name = "Rol")
-    private String Rol;
+    private String rol;  // <-- Cambio a camelCase
 
-    @OneToOne(mappedBy = "Usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    // CORRECCIÓN: mappedBy debe coincidir con el nombre del campo en CITA
+    @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private CITA cita;
 
     public USUARIO() {
     }
 
-    public USUARIO(String NombreCompleto, String Email, Long Telefono, Date FechaRegistro, String Rol) {
-        this.NombreCompleto = NombreCompleto;
-        this.Email = Email;
-        this.Telefono = Telefono;
-        this.FechaRegistro = FechaRegistro;
-        this.Rol = Rol;
+    public USUARIO(String NombreCompleto, String Email, Long Telefono, LocalDate FechaRegistro, String Rol) {
+        this.nombreCompleto = NombreCompleto;
+        this.email = Email;
+        this.telefono = Telefono;
+        this.fechaRegistro = FechaRegistro;
+        this.rol = Rol;
     }
 
     public String getNombreCompleto() {
-        return NombreCompleto;
+        return nombreCompleto;
     }
 
     public void setNombreCompleto(String NombreCompleto) {
-        this.NombreCompleto = NombreCompleto;
+        this.nombreCompleto = NombreCompleto;
     }
 
     public String getEmail() {
-        return Email;
+        return email;
     }
 
     public void setEmail(String Email) {
-        this.Email = Email;
+        this.email = Email;
     }
 
     public Long getTelefono() {
-        return Telefono;
+        return telefono;
     }
 
     public void setTelefono(Long Telefono) {
-        this.Telefono = Telefono;
+        this.telefono= Telefono;
     }
 
-    public Date getFechaRegistro() {
-        return FechaRegistro;
+    public LocalDate getFechaRegistro() {
+        return fechaRegistro ;
     }
 
-    public void setFechaRegistro(Date FechaRegistro) {
-        this.FechaRegistro = FechaRegistro;
+    public void setFechaRegistro(LocalDate FechaRegistro) {
+        this.fechaRegistro = FechaRegistro;
     }
 
     public String getRol() {
-        return Rol;
+        return rol;
     }
 
     public void setRol(String Rol) {
-        this.Rol = Rol;
+        this.rol = Rol;
     }
 
     public Long getId() {

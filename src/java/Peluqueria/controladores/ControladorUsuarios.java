@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.UserTransaction;
+import java.time.LocalDate;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Date;
@@ -95,8 +96,8 @@ public class ControladorUsuarios extends HttpServlet {
                 case "/listar": {
                     transaccion.begin();
 
-                    List<USUARIO> lista_usuarios = new ArrayList<>();
-                    Query consulta = em.createNativeQuery("SELECT * FROM USUARIO", USUARIO.class);
+                    List<USUARIO> lista_usuarios = new ArrayList<USUARIO>();
+                    Query consulta = em.createNativeQuery("SELECT * FROM USUARIOS", USUARIO.class);
                     lista_usuarios = consulta.getResultList();
                     request.setAttribute("usuarios", lista_usuarios);
                     VISTA = "/WEB-INF/Peluqueria.Vista/usuarios.jsp";
@@ -160,7 +161,7 @@ public class ControladorUsuarios extends HttpServlet {
 
                 nuevo_usuario.setTelefono(Long.parseLong(request.getParameter("telefono")));
 
-                Date fecha_actual = new Date();
+                LocalDate fecha_actual = LocalDate.now() ;
                 nuevo_usuario.setFechaRegistro(fecha_actual);
 
                 nuevo_usuario.setRol("Cliente");
