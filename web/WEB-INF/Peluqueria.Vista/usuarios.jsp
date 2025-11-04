@@ -9,9 +9,13 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Peluqueria Paqui Diaz</title>
+        <link rel="stylesheet" href="/web/css/main.css" type="text/css"/>
     </head>
     <body>
-        <h1>LISTA DE USUARIOS</h1>
+        <div class="header">
+            <h1>🧑‍💼 LISTA DE USUARIOS</h1>
+            <p>Gestión de clientes y empleados - Peluquería Paqui Díaz</p>
+        </div>
 
 
         <%
@@ -20,6 +24,11 @@
 
             if (usuarios != null && !usuarios.isEmpty()) {
         %>
+
+        <div class="contador_usuarios">
+            <strong>📊 Total de usuarios registrados: <%= usuarios.size()%></strong>
+        </div>
+
         <table>
 
             <tr>
@@ -39,7 +48,7 @@
                 <td><%=usuarios.get(i).getId()%></td>
                 <td><%= usuarios.get(i).getNombreCompleto()%></td>
                 <td><%= usuarios.get(i).getEmail()%></td>
-                <td><%= usuarios.get(i).getTelefono()%></td>
+                <td class="derecha"><%= usuarios.get(i).getTelefono()%></td>
                 <td><%= usuarios.get(i).getFechaRegistro()%></td>
                 <td><%= usuarios.get(i).getRol()%></td>
             </tr>
@@ -49,24 +58,23 @@
 
         </table>
 
-        <p><strong>Total de usuarios:</strong> <%= usuarios.size()%></p>
         <%
         } else {
         %>
         <div class="empty-message">
-            <h3>No hay usuarios registrados</h3>
+            <h3>📭 No hay usuarios registrados</h3>
             <p>No se encontraron usuarios en la base de datos.</p>
-            <a href="new" class="btn">Registrar Primer Usuario</a>
+            <a href="new" class="enlace">👤 Registrar Primer Usuario</a>
         </div>
         <%
             }
         %>
 
 
-        <p><a href="/Peluqueria/Usuario/new" class="enlace">Registrar Usuario</a></p>
-        <a href="/Peluqueria/Usuario" class="enlace">Volver al Inicio</a>
-
-
+        <div class="navigation">
+            <a href="/Peluqueria/Usuario/new" class="enlace">➕ Registrar Nuevo Usuario</a>
+            <a href="/Peluqueria" class="enlace enlace-secondary">🏠 Volver al Inicio</a>
+        </div>
 
 
     </body>

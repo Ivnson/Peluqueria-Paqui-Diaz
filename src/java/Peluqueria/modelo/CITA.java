@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 //import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -52,11 +53,11 @@ public class CITA implements Serializable {
 
     //RELACION 1---1 (UNA CITA PERTENECE SOLO A UN USUARIO Y UN USUARIO SOLO TIENE UNA CITA
     // CORRECCIÓN: Nombre del campo en minúscula para seguir convención Java
-    @OneToOne
-    @JoinColumn(name = "usuario_id", unique = true, nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
     private USUARIO usuario;  // <-- Cambio a camelCase
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "Cita_Servicio",
             joinColumns = @JoinColumn(name = "idCita", referencedColumnName = "id"),

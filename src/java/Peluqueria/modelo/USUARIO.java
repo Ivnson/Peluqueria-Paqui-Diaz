@@ -19,6 +19,8 @@ import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -27,9 +29,9 @@ import java.util.Date;
 @Entity
 @Table(name = "usuarios")
 public class USUARIO implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,12 +42,11 @@ public class USUARIO implements Serializable {
     //le pongo el UNIQUE despues de hacer pruebas 
     @Column(name = "Email", nullable = false)
     private String email;  // <-- Cambio a camelCase
-    
+
     //le pongo el UNIQUE despues de hacer pruebas 
     @Column(name = "Telefono", nullable = false, length = 12)
     private Long telefono;  // <-- Cambio a camelCase
 
-    
     @Column(name = "FechaRegistro", nullable = false)
     private LocalDate fechaRegistro;  // <-- Cambio a camelCase
 
@@ -54,7 +55,7 @@ public class USUARIO implements Serializable {
 
     // CORRECCIÓN: mappedBy debe coincidir con el nombre del campo en CITA
     @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private CITA cita;
+    private Set<CITA> citas = new HashSet<>();
 
     public USUARIO() {
     }
@@ -88,11 +89,11 @@ public class USUARIO implements Serializable {
     }
 
     public void setTelefono(Long Telefono) {
-        this.telefono= Telefono;
+        this.telefono = Telefono;
     }
 
     public LocalDate getFechaRegistro() {
-        return fechaRegistro ;
+        return fechaRegistro;
     }
 
     public void setFechaRegistro(LocalDate FechaRegistro) {
@@ -105,6 +106,14 @@ public class USUARIO implements Serializable {
 
     public void setRol(String Rol) {
         this.rol = Rol;
+    }
+
+    public Set<CITA> getCitas() {
+        return citas;
+    }
+
+    public void setCitas(Set<CITA> citas) {
+        this.citas = citas;
     }
 
     public Long getId() {

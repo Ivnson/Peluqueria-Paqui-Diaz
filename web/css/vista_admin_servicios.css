@@ -1,0 +1,126 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 4 nov 2025, 19:41:18
+    Author     : ivan
+*/
+
+:root {
+    --verde-agua: #88D4C0;
+    --verde-oscuro: #3a9f8a;
+    --blanco: #ffffff;
+    --gris-fondo: #f8f9fa;
+    --gris-bordes: #dee2e6;
+    --texto-oscuro: #212529;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: var(--gris-fondo);
+    color: var(--texto-oscuro);
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: var(--blanco);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    margin: 0;
+    color: var(--verde-oscuro);
+}
+
+.btn-crear {
+    padding: 10px 15px;
+    background-color: var(--verde-oscuro);
+    color: var(--blanco);
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* * ESTILOS DE LA TABLA (Como tu imagen)
+*/
+
+/* El contenedor para los bordes redondeados */
+.table-wrapper {
+    border-radius: 8px;  /* <-- TUS BORDES REDONDEADOS */
+    overflow: hidden;   /* <-- Crucial para que funcione en la tabla */
+    border: 1px solid var(--gris-bordes);
+}
+
+table {
+    width: 100%;
+    /* 'border-collapse' quita el espacio entre celdas */
+    border-collapse: collapse;
+    margin: 0;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    /* Solo bordes horizontales, como en tu imagen */
+    border-bottom: 1px solid var(--gris-bordes);
+}
+
+/* * TUS COLORES: Cabecera Verde Agua, Cuerpo Blanco 
+*/
+thead th {
+    background-color: var(--verde-agua); /* <-- TU COLOR VERDE AGUA */
+    color: var(--texto-oscuro);
+    font-weight: 600;
+}
+
+tbody {
+    background-color: var(--blanco); /* <-- TU COLOR BLANCO */
+}
+
+/* Fila de "no hay servicios" */
+.no-servicios td {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+}
+
+/* Elimina el borde inferior de la última fila */
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Botones de Acción */
+.btn-editar, .btn-eliminar {
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+.btn-editar {
+    background-color: #f1c40f;
+    color: #333;
+}
+.btn-eliminar {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+.acciones-form {
+    display: inline;
+}

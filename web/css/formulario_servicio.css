@@ -1,0 +1,138 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 4 nov 2025, 19:58:06
+    Author     : ivan
+*/
+
+:root {
+    --verde-agua: #88D4C0;
+    --verde-oscuro: #3a9f8a;
+    --blanco: #ffffff;
+    --gris-fondo: #f8f9fa;
+    --gris-bordes: #dee2e6;
+    --texto-oscuro: #212529;
+    --rojo-error: #e74c3c;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: var(--gris-fondo); /* <-- Mantenemos el fondo claro */
+    color: var(--texto-oscuro);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* ****************************************************** */
+/* *** CAMBIOS PRINCIPALES BASADOS EN TU PETICIÓN *** */
+/* ****************************************************** */
+
+.form-container {
+    width: 90%;
+    max-width: 600px;
+    margin: 20px;
+    padding: 30px;
+
+    /* CAMBIO: Fondo verde oscuro */
+    background-color: var(--verde-oscuro);
+
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+    /* CAMBIO: Letras blancas */
+    color: var(--blanco);
+}
+
+h1 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: var(--blanco); /* CAMBIO: Título en blanco */
+    text-align: center;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--blanco); /* CAMBIO: Etiquetas en blanco */
+    opacity: 0.9; /* Un poco más suave */
+}
+
+/* Los campos de texto se quedan con fondo blanco y texto oscuro,
+  lo cual está perfecto para la legibilidad.
+*/
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--gris-bordes);
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 1rem;
+
+    /* CAMBIO: Texto oscuro sobre fondo blanco del input */
+    color: var(--texto-oscuro);
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-group {
+    margin-bottom: 25px;  /* <-- CAMBIO AQUÍ (antes 20px) */
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;   /* <-- CAMBIO AQUÍ (antes 30px) */
+}
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-submit {
+    /* CAMBIO: Botón principal en Verde Agua */
+    background-color: var(--verde-agua);
+    /* CAMBIO: Texto oscuro para que contraste */
+    color: white;
+    opacity: 0.8;
+}
+.btn-submit:hover {
+    background-color: #a0e0cd; /* Verde agua más claro */
+}
+
+.btn-cancel {
+    background-color: var(--verde-agua);
+    color: var(--blanco); /* CAMBIO: Botón de cancelar en blanco */
+    opacity: 0.8;
+}
+.btn-cancel:hover {
+    opacity: 1;
+}
+
+/* Mensaje de error */
+.error-msg {
+    padding: 15px;
+    background-color: var(--rojo-error);
+    border: 1px solid #c0392b;
+    color: var(--blanco); /* Letras blancas sobre fondo rojo */
+    border-radius: 5px;
+    margin-bottom: 20px;
+}

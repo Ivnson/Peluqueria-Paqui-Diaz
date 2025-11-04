@@ -7,7 +7,7 @@
     <class>Peluqueria.modelo.USUARIO</class>
     <class>Peluqueria.modelo.SERVICIO</class>
     <properties>
-      <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
+      <property name="jakarta.persistence.schema-generation.database.action" value="create"/>
       <property name="eclipselink.ddl-generation-data-source" value="jdbc/Peluqueria_DB"/>
       <property name="eclipselink.logging.level.sql" value="FINE"/>
     </properties>

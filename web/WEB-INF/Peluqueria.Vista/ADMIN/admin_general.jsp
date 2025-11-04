@@ -1,6 +1,6 @@
 <%-- 
-    Document   : error
-    Created on : 25 oct 2025, 14:14:50
+    Document   : admin
+    Created on : 2 nov 2025, 15:52:10
     Author     : ivan
 --%>
 
@@ -9,10 +9,9 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Peluqueria Paqui Diaz</title>
-        <link rel="stylesheet" href="/web/css/main.css" type="text/css"/>
+        <title>JSP Page</title>
     </head>
     <body>
-        <h1>ERROR!</h1>
+        <h1>Hello World!</h1>
     </body>
 </html>
