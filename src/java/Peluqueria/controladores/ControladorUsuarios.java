@@ -5,34 +5,26 @@
 package Peluqueria.controladores;
 
 import Peluqueria.modelo.USUARIO;
-import com.sun.istack.logging.Logger;
 import jakarta.annotation.Resource;
-import jakarta.jms.Session;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.SystemException;
 import jakarta.transaction.UserTransaction;
 import java.time.LocalDate;
-import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  *
  * @author ivan
  */
-@WebServlet(name = "ControladorUsuarios", urlPatterns = {"/Usuario", "/Usuario/*"})
+@WebServlet(name = "ControladorUsuarios", urlPatterns = {"/Admin/Usuarios/*"})
 public class ControladorUsuarios extends HttpServlet {
 
     /**
@@ -80,54 +72,31 @@ public class ControladorUsuarios extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String VISTA = null;
-        String accion = null;
+        String pathInfo = request.getPathInfo();
 
-        if (request.getServletPath().equals("/Usuario") == true) {
-            if (request.getPathInfo() != null) {
-                accion = request.getPathInfo();
-            } else {
-                accion = "error";
-            }
+        if (pathInfo == null || pathInfo.equals("/")) {
+            pathInfo = "/Listar";
         }
 
-        try {
-            switch (accion) {
-                case "/listar": {
-                    transaccion.begin();
+        switch (pathInfo) {
+            case "/Listar": {
 
-                    List<USUARIO> lista_usuarios = new ArrayList<USUARIO>();
-                    Query consulta = em.createNativeQuery("SELECT * FROM USUARIOS", USUARIO.class);
-                    lista_usuarios = consulta.getResultList();
-                    request.setAttribute("usuarios", lista_usuarios);
-                    VISTA = "/WEB-INF/Peluqueria.Vista/usuarios.jsp";
-                    transaccion.commit();
-                }
-                break;
-
-                case "/new": {
-                    VISTA = "/WEB-INF/Peluqueria.Vista/formulario_usuarios.jsp";
-                }
-                break;
-
-                default:
-                    VISTA = "/WEB-INF/Peluqueria.Vista/error.jsp";
+                ListarUsuarios(request, response);
             }
-        } catch (Exception e1) {
-            try {
-                if (transaccion != null) {
-                    transaccion.rollback();
-                }
-            } catch (Exception e2) {
-                System.out.println("ERROR EN ROLLBACK" + e2.getMessage());
-            }
+            break;
 
-            System.out.println("ERROR --> " + e1.getMessage());
-            VISTA = "error";
+            case "/Nuevo": {
+                MostrarFormularioVacio(request, response);
+            }
+            break;
+
+            case "/Editar": {
+                MostrarFormularioEditar(request, response);
+            }
+            break;
+            default:
+                response.sendError(404, "PAGINA NO ENCONTRADA");
         }
-
-        RequestDispatcher rd = request.getRequestDispatcher(VISTA);
-        rd.forward(request, response);
     }
 
     /**
@@ -142,54 +111,27 @@ public class ControladorUsuarios extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String accion = request.getPathInfo();
+        String pathInfo = request.getPathInfo();
 
-        System.out.println("=== PARÁMETROS RECIBIDOS ===");
-        System.out.println("nombreCompleto: " + request.getParameter("nombreCompleto"));
-        System.out.println("email: " + request.getParameter("email"));
-        System.out.println("telefono: " + request.getParameter("telefono"));
-        System.out.println("============================");
+        switch (pathInfo) {
+            case "/Crear": {
 
-        if ("/crear".equals(accion)) {
-            try {
-                transaccion.begin();
-
-                USUARIO nuevo_usuario = new USUARIO();
-                nuevo_usuario.setNombreCompleto(request.getParameter("nombreCompleto"));
-
-                nuevo_usuario.setEmail(request.getParameter("email"));
-
-                nuevo_usuario.setTelefono(Long.parseLong(request.getParameter("telefono")));
-
-                LocalDate fecha_actual = LocalDate.now() ;
-                nuevo_usuario.setFechaRegistro(fecha_actual);
-
-                nuevo_usuario.setRol("Cliente");
-
-                em.persist(nuevo_usuario);
-
-                transaccion.commit();
-
-                //REDIRIGIR A LA LISTA DE USUARIOS
-                response.sendRedirect(request.getContextPath() + "/Usuario/listar");
-
-            } catch (Exception e1) {
-
-                try {
-                    if (transaccion != null) {
-                        transaccion.rollback();
-                    }
-                } catch (Exception e2) {
-                    System.out.println("ERROR EN ROLLBACK" + e2.getMessage());
-                }
-
-                System.out.println("ERROR --> " + e1.getMessage());
-
-                // Mostrar el error en el formulario en lugar de ir a error.jsp
-                request.setAttribute("error", "Error al crear usuario: " + e1.getMessage());
-                RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/formulario_usuarios.jsp");
-                rd.forward(request, response);
+                CrearUsuario(request, response);
             }
+            break;
+
+            case "/Actualizar": {
+                ActualizarUsuario(request, response);
+            }
+            break;
+
+            case "/Eliminar": {
+                EliminarUsuario(request, response);
+            }
+            break;
+            default:
+                response.sendError(404, "PAGINA NO ENCONTRADA");
+
         }
     }
 
@@ -202,5 +144,232 @@ public class ControladorUsuarios extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void ListarUsuarios(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        List<USUARIO> usuarios = new ArrayList();
+        Query consulta = em.createNativeQuery(
+                "SELECT * FROM USUARIOS", USUARIO.class);
+
+        usuarios = consulta.getResultList();
+
+        if (usuarios != null) {
+            System.out.println(" LOG --> MOSTRANDO LOS USUARIOS");
+            request.setAttribute("ListaUsuarios", usuarios);
+
+            request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/admin_usuarios.jsp").forward(request, response);
+        }
+    }
+
+    private void MostrarFormularioVacio(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        System.out.println("  LOG --> MOSTRANDO EL FORMULARIO PARA CREAR UN USUARIO");
+        request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_usuario.jsp").forward(request, response);
+    }
+
+    private void MostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        //HAY QUE HACER ESTO YA QUE SI UNA PERSONA PONE DIRECTAMENTE LA URL
+        //NO POSEE UN ID Y EL REQUEST.GETPARAMETER DARA ERROR 
+        String StringId = request.getParameter("id");
+        Long id = null;
+        //String error = null ; 
+
+        if (StringId != null && StringId.isEmpty() == false) {
+            try {
+                id = Long.parseLong(StringId);
+            } catch (Exception e) {
+                System.out.println("NO SE HA PODIDO CONVERTIR EL ID");
+                response.sendRedirect(request.getContextPath() + "/Admin/Usuarios/Listar");
+            }
+        } else {
+            System.out.println("NO SE ESPECIFICÓ NINGUN ID");
+            response.sendRedirect(request.getContextPath() + "/Admin/Usuarios/Listar");
+        }
+
+        USUARIO UsuarioEncontrado = em.find(USUARIO.class, id);
+
+        if (UsuarioEncontrado != null) {
+            request.setAttribute("usuario", UsuarioEncontrado);
+
+            request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_usuario.jsp").forward(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/Admin/Usuarios/Listar");
+        }
+
+    }
+
+    private void CrearUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+
+        String error = null;
+
+        try {
+
+            transaccion.begin();
+
+            String NombreCompleto = request.getParameter("NombreCompleto");
+            LocalDate fechaRegistro = LocalDate.now();
+            String Email = request.getParameter("Email");
+            Long Telefono = Long.parseLong(request.getParameter("Telefono"));
+            String Rol = request.getParameter("Rol");
+
+            Query consulta = em.createNativeQuery(
+                    "SELECT * FROM USUARIOS WHERE NOMBRECOMPLETO = ?", USUARIO.class);
+
+            consulta.setParameter(1, NombreCompleto);
+
+            List<USUARIO> usuario_encontrado = consulta.getResultList();
+
+            if (usuario_encontrado.isEmpty() == true) {
+
+                USUARIO usuario_a_crear = new USUARIO(NombreCompleto, Email, Telefono, fechaRegistro, Rol);
+
+                em.persist(usuario_a_crear);
+
+                transaccion.commit();
+
+                System.out.println(" LOG --> CREANDO UN NUEVO USUARIO");
+            } else {
+                System.out.println("USUARIO YA CREADO");
+                error = "USUARIO YA CREADO";
+                transaccion.rollback();
+            }
+        } catch (Exception e) {
+            error = "ERROR AL CREAR EL USUARIO";
+
+            try {
+                transaccion.rollback();
+            } catch (Exception e2) {
+                error = "ERROR EN LA TRANSACCION";
+            }
+        }
+
+        if (error != null) {
+            request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_usuario.jsp").forward(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/Admin/Usuarios/Listar");
+        }
+
+    }
+
+    private void ActualizarUsuario(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        //HAY QUE HACER ESTO YA QUE SI UNA PERSONA PONE DIRECTAMENTE LA URL
+        //NO POSEE UN ID Y EL REQUEST.GETPARAMETER DARA ERROR 
+        String StringId = request.getParameter("id");
+        Long id = null;
+        String error = null;
+
+        if (StringId != null && StringId.isEmpty() == false) {
+            try {
+                id = Long.parseLong(StringId);
+            } catch (Exception e) {
+                error = "NO SE HA PODIDO CONVERTIR EL ID";
+            }
+        } else {
+            error = "NO SE ESPECIFICÓ NINGUN ID";
+        }
+
+        try {
+            transaccion.begin();
+
+            String NombreCompleto = request.getParameter("NombreCompleto");
+            LocalDate fechaRegistro = LocalDate.now();
+            String Email = request.getParameter("Email");
+            Long Telefono = Long.parseLong(request.getParameter("Telefono"));
+            String Rol = request.getParameter("Rol");
+
+            USUARIO usuario = em.find(USUARIO.class, id);
+
+            if (usuario != null) {
+
+                usuario.setNombreCompleto(NombreCompleto);
+                usuario.setFechaRegistro(fechaRegistro);
+                usuario.setEmail(Email);
+                usuario.setTelefono(Telefono);
+                usuario.setRol(Rol);
+
+                transaccion.commit();
+            } else {
+                transaccion.rollback();
+                error = "USUARIO NO ENCONTRADO";
+            }
+
+        } catch (Exception e) {
+            error = "ERROR AL ACTUALIZAR EL USUARIO";
+
+            try {
+                transaccion.rollback();
+            } catch (Exception e2) {
+                error = "ERROR EN LA TRANSACCION";
+            }
+        }
+
+        if (error != null) {
+
+            if (id != null) {
+                USUARIO UsuarioOriginal = em.find(USUARIO.class, id);
+                request.setAttribute("usuario", UsuarioOriginal);
+            }
+
+            request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_usuario.jsp").forward(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/Admin/Usuarios/Listar");
+        }
+    }
+    
+    
+    
+    
+    
+    
+    private void EliminarUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        //HAY QUE HACER ESTO YA QUE SI UNA PERSONA PONE DIRECTAMENTE LA URL
+        //NO POSEE UN ID Y EL REQUEST.GETPARAMETER DARA ERROR 
+        String StringId = request.getParameter("id");
+        Long id = null;
+        String error = null;
+
+        if (StringId != null && StringId.isEmpty() == false) {
+            try {
+                id = Long.parseLong(StringId);
+            } catch (Exception e) {
+                error = "NO SE HA PODIDO CONVERTIR EL ID";
+            }
+        } else {
+            error = "NO SE ESPECIFICÓ NINGUN ID";
+        }
+
+        try {
+            transaccion.begin();
+
+            USUARIO UsuarioEliminar = em.find(USUARIO.class, id);
+
+            if (UsuarioEliminar != null) {
+                em.remove(UsuarioEliminar);
+
+                transaccion.commit();
+            } else {
+                transaccion.rollback();
+                error = "USUARIO NO ENCONTRADO";
+            }
+
+        } catch (Exception e) {
+            error = "ERROR AL ELIMINAR EL USUARIO";
+
+            try {
+                transaccion.rollback();
+            } catch (Exception e2) {
+                error = "ERROR EN LA TRANSACCION";
+            }
+        }
+
+        if (error != null) {
+            System.out.println(" ERROR. VOLVIENDO A LISTAR LOS USUARIOS");
+            response.sendRedirect(request.getContextPath() + "/Admin/Usuarios/Listar");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/Admin/Usuarios/Listar");
+        }
+    }
 
 }

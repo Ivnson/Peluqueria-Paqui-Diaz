@@ -16,49 +16,32 @@
     <body>
 
         <%
-            // --- 1. LÓGICA DE JAVA (SCRIPTLET) ---
 
-            // Intentamos obtener el servicio que el Controlador nos envió (en modo "Editar")
             SERVICIO servicio = (SERVICIO) request.getAttribute("servicio");
 
-            // Variable para guardar el mensaje de error (si existe)
             String error = (String) request.getAttribute("error");
 
-            // Variables para decidir el modo y la URL del formulario
-            String modo = "crear"; // Por defecto, es un formulario de "Crear"
-            String urlAccion = request.getContextPath() + "/Admin/Servicios/Crear"; // URL por defecto
+            String modo = "crear";
+            String urlAccion = request.getContextPath() + "/Admin/Servicios/Crear";
 
-            // Si el objeto 'servicio' NO es nulo, estamos en modo "Editar"
             if (servicio != null) {
                 modo = "editar";
                 urlAccion = request.getContextPath() + "/Admin/Servicios/Actualizar";
             }
 
-            // Variables para pre-rellenar los campos
-            // Por defecto, están vacíos (para modo "Crear")
             String nombre = "";
             String descripcion = "";
             String duracion = "";
             String precio = "";
 
-            // Si estamos en modo "Editar", rellenamos las variables con los datos del servicio
             if (modo.equals("editar")) {
                 nombre = servicio.getNombreServicio();
                 descripcion = servicio.getDescripcion();
-                duracion = String.valueOf(servicio.getDuracion()); // Convertir int a String
-                precio = String.valueOf(servicio.getPrecio());     // Convertir float a String
+                duracion = String.valueOf(servicio.getDuracion());
+                precio = String.valueOf(servicio.getPrecio());
             }
 
-            /*
-         * NOTA IMPORTANTE SOBRE ERRORES:
-         * Tu 'ControladorServicios' (en CrearServicio y ActualizarServicio)
-         * debe enviar el mensaje de error así para que este JSP lo muestre:
-         *
-         * if (error != null) {
-         * request.setAttribute("error", error); // <-- ¡ESTA LÍNEA ES VITAL!
-         * request.getRequestDispatcher(...).forward(request, response);
-         * }
-             */
+
         %>
 
 
