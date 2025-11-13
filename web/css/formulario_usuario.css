@@ -1,11 +1,3 @@
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
-*/
-/* 
-    Created on : 6 nov 2025, 0:17:34
-    Author     : ivan
-*/
 
 :root {
     --verde-agua: #88D4C0;
@@ -15,124 +7,176 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     --gris-bordes: #dee2e6;
     --texto-oscuro: #212529;
     --rojo-error: #e74c3c;
+    --azul-focus: #3498db;
+}
+
+/* --- Reseteo Global y Cuerpo --- */
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     margin: 0;
-    background-color: var(--gris-fondo); /* <-- Mantenemos el fondo claro */
+    background-color: var(--gris-fondo);
     color: var(--texto-oscuro);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 20px; /* Añadido para que no se pegue en móviles */
 }
 
-/* ****************************************************** */
-/* *** CAMBIOS PRINCIPALES BASADOS EN TU PETICIÓN *** */
-/* ****************************************************** */
-
+/* --- Contenedor Principal (Tarjeta Verde) --- */
 .form-container {
-    width: 90%;
+    width: 100%;
     max-width: 600px;
     margin: 20px;
-    padding: 30px;
-
-    /* CAMBIO: Fondo verde oscuro */
+    padding: 35px 40px; /* Más padding */
     background-color: var(--verde-oscuro);
-
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-
-    /* CAMBIO: Letras blancas */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     color: var(--blanco);
 }
 
 h1 {
     margin-top: 0;
-    margin-bottom: 25px;
-    color: var(--blanco); /* CAMBIO: Título en blanco */
+    margin-bottom: 30px;
+    color: var(--blanco);
     text-align: center;
+    font-size: 1.9rem;
+}
+
+/* --- Grupos de Formulario y Etiquetas --- */
+.form-group {
+    margin-bottom: 25px;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: bold;
-    color: var(--blanco); /* CAMBIO: Etiquetas en blanco */
-    opacity: 0.9; /* Un poco más suave */
+    font-weight: 600;
+    color: var(--blanco);
+    opacity: 0.9;
 }
 
-/* Los campos de texto se quedan con fondo blanco y texto oscuro,
-  lo cual está perfecto para la legibilidad.
-*/
+/* --- Estilo Unificado para TODOS los Inputs --- */
 .form-group input[type="text"],
 .form-group input[type="number"],
-.form-group textarea {
+.form-group input[type="email"], /* Añadido para tu formulario de usuario */
+.form-group input[type="date"],  /* Añadido para el formulario de citas */
+.form-group input[type="time"],  /* Añadido para el formulario de citas */
+.form-group input[type="password"],
+.form-group textarea,
+.form-group select {            /* Añadido para los desplegables */
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid var(--gris-bordes);
-    border-radius: 5px;
+    border-radius: 8px;
     box-sizing: border-box;
     font-family: inherit;
     font-size: 1rem;
-
-    /* CAMBIO: Texto oscuro sobre fondo blanco del input */
     color: var(--texto-oscuro);
+    background-color: var(--blanco);
+    transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .form-group textarea {
-    min-height: 100px;
+    min-height: 120px;
     resize: vertical;
 }
 
-.form-group {
-    margin-bottom: 25px;  /* <-- CAMBIO AQUÍ (antes 20px) */
+/* Estilo :focus profesional (para accesibilidad) */
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="time"]:focus,
+.form-group input[type="password"]:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--azul-focus);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
 }
 
+/* --- Grupo de Botones (Submit/Cancel) --- */
 .button-group {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end; /* Alineados a la derecha */
     align-items: center;
-    margin-top: 40px;   /* <-- CAMBIO AQUÍ (antes 30px) */
+    margin-top: 40px;
+    gap: 15px; /* Espacio entre botones */
 }
+
 .btn {
     padding: 10px 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease-out;
 }
 
 .btn-submit {
-    /* CAMBIO: Botón principal en Verde Agua */
     background-color: var(--verde-agua);
-    /* CAMBIO: Texto oscuro para que contraste */
     color: white;
-    opacity: 0.8;
 }
 .btn-submit:hover {
-    background-color: #a0e0cd; /* Verde agua más claro */
+    background-color: #a0e0cd;
+    transform: translateY(-2px);
 }
 
 .btn-cancel {
     background-color: var(--verde-agua);
-    color: var(--blanco); /* CAMBIO: Botón de cancelar en blanco */
-    opacity: 0.8;
+    color: var(--texto-oscuro);
 }
 .btn-cancel:hover {
-    opacity: 1;
+    background-color: #a0e0cd;
+    transform: translateY(-2px);
 }
 
-/* Mensaje de error */
+/* --- Mensaje de Error --- */
 .error-msg {
     padding: 15px;
     background-color: var(--rojo-error);
     border: 1px solid #c0392b;
-    color: var(--blanco); /* Letras blancas sobre fondo rojo */
-    border-radius: 5px;
-    margin-bottom: 20px;
+    color: var(--blanco);
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+
+.login-actions {
+    margin-top: 30px;
+    text-align: center; /* Centra todo el contenido */
+}
+
+/* 1. Hacemos que el botón "Entrar" ocupe el 100% del ancho */
+.login-actions .btn-submit {
+    width: 100%; 
+    margin-bottom: 20px; /* Espacio entre el botón y el enlace */
+    font-size: 1.1rem;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+/* 2. Arreglamos el estilo del enlace "¡Regístrate aquí!" */
+.login-actions a,
+.login-actions a:visited { /* :visited arregla el color morado */
+    color: var(--blanco);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none; /* Quita el subrayado */
+    opacity: 0.9;
+    transition: all 0.2s ease-out;
+}
+
+/* 3. El efecto hover para el enlace */
+.login-actions a:hover {
+    opacity: 1;
+    color: var(--verde-agua);
 }

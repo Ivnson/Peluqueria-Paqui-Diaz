@@ -16,40 +16,27 @@
     <body>
 
         <%
-
             USUARIO usuario = (USUARIO) request.getAttribute("usuario");
-
             String error = (String) request.getAttribute("error");
 
             String modo = "crear";
             String urlAccion = request.getContextPath() + "/Admin/Usuarios/Crear";
-
             if (usuario != null) {
                 modo = "editar";
                 urlAccion = request.getContextPath() + "/Admin/Usuarios/Actualizar";
             }
 
-            String nombre = "";
-            String email = "" ;
-            String rol = "" ; 
-            Long telefono = null ; 
+            // --- Lógica de re-poblado ---
+            // (Mejorado para manejar errores y valores nulos)
+            String nombre = (request.getParameter("NombreCompleto") != null) ? request.getParameter("NombreCompleto") : (modo.equals("editar") ? usuario.getNombreCompleto() : "");
+            String email = (request.getParameter("Email") != null) ? request.getParameter("Email") : (modo.equals("editar") ? usuario.getEmail() : "");
+            String rol = (request.getParameter("Rol") != null) ? request.getParameter("Rol") : (modo.equals("editar") ? usuario.getRol() : "Cliente");
 
-            if (modo.equals("editar")) {
-                nombre = usuario.getNombreCompleto() ; 
-                email = usuario.getEmail() ; 
-                rol = usuario.getRol() ; 
-                telefono = usuario.getTelefono() ; 
-               
-            }
-
-
+            // Corregido para manejar el 'Long' y 'null' correctamente
+            String telefono = (request.getParameter("Telefono") != null) ? request.getParameter("Telefono") : (modo.equals("editar") && usuario.getTelefono() != null ? String.valueOf(usuario.getTelefono()) : "");
         %>
 
-
-
-
         <div class="form-container">
-
             <h1>
                 <% if (modo.equals("editar")) { %>
                 Editar Usuario
@@ -63,7 +50,6 @@
                 <strong>Error:</strong> <%= error%>
             </div>
             <% }%>
-
 
             <form action="<%= urlAccion%>" method="POST">
 
@@ -81,10 +67,13 @@
                     <input type="text" id="Email" name="Email" value="<%= email%>" required>
                 </div>
 
-                //SUSTITUIR ESTO POR UN DESPLEGABLE CON DOS OPCIONES ---> CLIENTE Y ADMIN 
+                <%-- CAMPO DE ROL (Corregido con desplegable) --%>
                 <div class="form-group">
                     <label for="Rol">Rol:</label>
-                    <input type="text" id="Rol" name="Rol" value="<%= rol%>" required>
+                    <select id="Rol" name="Rol">
+                        <option value="Cliente" <%= "Cliente".equals(rol) ? "selected" : ""%>>Cliente</option>
+                        <option value="Administrador" <%= "Administrador".equals(rol) ? "selected" : ""%>>Administrador</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -92,21 +81,65 @@
                     <input type="number" id="Telefono" name="Telefono" value="<%= telefono%>" required>
                 </div>
 
+                <%-- 
+                  ¡NUEVO CAMPO DE CONTRASEÑA!
+                  - type="password" (para los *)
+                  - id="password" (para el JavaScript)
+                  - El 'required' solo se pone en modo "crear"
+                --%>
+                <div class="form-group">
+                    <label for="password">
+                        <% if (modo.equals("editar")) { %>
+                        Nueva Contraseña (dejar en blanco para no cambiar)
+                        <% } else { %>
+                        Contraseña:
+                        <% } %>
+                    </label>
+                    <input type="password" id="password" name="password" 
+                           <% if (modo.equals("crear")) {
+                                   out.print("required");
+                               } %>>
+
+                    <%-- El botón de "ver/ocultar" --%>
+                    <button type="button" id="togglePassword">Ver</button>
+                </div>
+
+
                 <div class="button-group">
                     <% if (modo.equals("editar")) { %>
                     <button type="submit" class="btn btn-submit">Guardar Cambios</button>
                     <% } else { %>
                     <button type="submit" class="btn btn-submit">Crear Usuario</button>
                     <% }%>
-
                     <a href="${pageContext.request.contextPath}/Admin/Usuarios/Listar" class="btn btn-cancel">
                         Cancelar
                     </a>
-
                 </div>
-
             </form>
         </div>
+
+        <%-- 
+          ¡NUEVO BLOQUE JAVASCRIPT!
+          (Se pone al final del <body> para que cargue más rápido)
+        --%>
+        <script>
+            // 1. Seleccionamos el botón y el campo de contraseña
+            const toggleButton = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+
+            // 2. Añadimos un "escuchador" de clics al botón
+            toggleButton.addEventListener('click', function () {
+
+                // 3. Comprobamos el tipo de input
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+
+                // 4. Cambiamos el tipo
+                passwordInput.setAttribute('type', type);
+
+                // 5. Cambiamos el texto del botón
+                this.textContent = (type === 'password') ? 'Ver' : 'Ocultar';
+            });
+        </script>
 
     </body>
 </html>

@@ -1,10 +1,7 @@
 /*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
-*/
-/* 
-    Created on : 4 nov 2025, 19:58:06
-    Author     : ivan
+ * Archivo: formulario_servicio.css
+ * (Estilo general para todos los formularios del panel de admin)
+ * Rediseño Profesional
 */
 
 :root {
@@ -15,124 +12,148 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     --gris-bordes: #dee2e6;
     --texto-oscuro: #212529;
     --rojo-error: #e74c3c;
+    --azul-focus: #3498db; /* Color para el :focus */
+}
+
+/* --- Reseteo Global y Cuerpo --- */
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     margin: 0;
-    background-color: var(--gris-fondo); /* <-- Mantenemos el fondo claro */
+    background-color: var(--gris-fondo);
     color: var(--texto-oscuro);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 20px;
 }
 
-/* ****************************************************** */
-/* *** CAMBIOS PRINCIPALES BASADOS EN TU PETICIÓN *** */
-/* ****************************************************** */
-
+/* --- Contenedor Principal (Tarjeta Verde) --- */
 .form-container {
-    width: 90%;
+    width: 100%;
     max-width: 600px;
     margin: 20px;
-    padding: 30px;
-
-    /* CAMBIO: Fondo verde oscuro */
+    padding: 35px 40px;
     background-color: var(--verde-oscuro);
-
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-
-    /* CAMBIO: Letras blancas */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     color: var(--blanco);
 }
 
 h1 {
     margin-top: 0;
-    margin-bottom: 25px;
-    color: var(--blanco); /* CAMBIO: Título en blanco */
+    margin-bottom: 30px;
+    color: var(--blanco);
     text-align: center;
+    font-size: 1.9rem;
+}
+
+/* --- Grupos de Formulario y Etiquetas --- */
+.form-group {
+    margin-bottom: 25px; /* Más espacio */
 }
 
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: bold;
-    color: var(--blanco); /* CAMBIO: Etiquetas en blanco */
-    opacity: 0.9; /* Un poco más suave */
+    font-weight: 600;
+    color: var(--blanco);
+    opacity: 0.9;
 }
 
-/* Los campos de texto se quedan con fondo blanco y texto oscuro,
-  lo cual está perfecto para la legibilidad.
-*/
+/* --- Estilo Unificado para TODOS los Inputs --- */
 .form-group input[type="text"],
 .form-group input[type="number"],
-.form-group textarea {
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group textarea,
+.form-group select {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid var(--gris-bordes);
-    border-radius: 5px;
+    border-radius: 8px; /* Más redondeado */
     box-sizing: border-box;
     font-family: inherit;
     font-size: 1rem;
-
-    /* CAMBIO: Texto oscuro sobre fondo blanco del input */
     color: var(--texto-oscuro);
+    background-color: var(--blanco);
+    transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out; /* Animación */
 }
 
 .form-group textarea {
-    min-height: 100px;
+    min-height: 120px;
     resize: vertical;
 }
 
-.form-group {
-    margin-bottom: 25px;  /* <-- CAMBIO AQUÍ (antes 20px) */
+/* Animación :focus profesional (para accesibilidad) */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--azul-focus);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
 }
 
+/* Ayuda para el 'select multiple' */
+.form-group small {
+    color: var(--blanco);
+    opacity: 0.8;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+
+/* --- Grupo de Botones (Submit/Cancel) --- */
 .button-group {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end; /* Alineados a la derecha */
     align-items: center;
-    margin-top: 40px;   /* <-- CAMBIO AQUÍ (antes 30px) */
+    margin-top: 40px;
+    gap: 15px; /* Espacio entre botones */
 }
+
 .btn {
     padding: 10px 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease-out; /* Animación */
 }
 
 .btn-submit {
-    /* CAMBIO: Botón principal en Verde Agua */
     background-color: var(--verde-agua);
-    /* CAMBIO: Texto oscuro para que contraste */
-    color: white;
-    opacity: 0.8;
+    color: var(--texto-oscuro);
 }
 .btn-submit:hover {
-    background-color: #a0e0cd; /* Verde agua más claro */
+    background-color: #a0e0cd;
+    transform: translateY(-2px); /* Animación */
 }
 
 .btn-cancel {
-    background-color: var(--verde-agua);
-    color: var(--blanco); /* CAMBIO: Botón de cancelar en blanco */
+    background-color: transparent;
+    color: var(--blanco);
     opacity: 0.8;
 }
 .btn-cancel:hover {
     opacity: 1;
+    text-decoration: underline;
 }
 
-/* Mensaje de error */
+/* --- Mensaje de Error --- */
 .error-msg {
     padding: 15px;
     background-color: var(--rojo-error);
     border: 1px solid #c0392b;
-    color: var(--blanco); /* Letras blancas sobre fondo rojo */
-    border-radius: 5px;
-    margin-bottom: 20px;
+    color: var(--blanco);
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-weight: 600;
 }

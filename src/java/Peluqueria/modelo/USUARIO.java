@@ -13,14 +13,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  *
@@ -40,7 +34,7 @@ public class USUARIO implements Serializable {
     private String nombreCompleto;  // <-- Cambio a camelCase
 
     //le pongo el UNIQUE despues de hacer pruebas 
-    @Column(name = "Email", nullable = false)
+    @Column(name = "Email", nullable = false, unique = true)
     private String email;  // <-- Cambio a camelCase
 
     //le pongo el UNIQUE despues de hacer pruebas 
@@ -55,17 +49,30 @@ public class USUARIO implements Serializable {
 
     // CORRECCIÓN: mappedBy debe coincidir con el nombre del campo en CITA
     @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<CITA> citas = new HashSet<>();
+    private CITA cita;
+
+    @Column(name = "Password", nullable = false, length = 64) // length=64 para guardar el hash SHA-256
+    private String password;
 
     public USUARIO() {
     }
 
+    public USUARIO(String NombreCompleto, String Email, Long Telefono, LocalDate FechaRegistro, String Rol, String contraseñaHash) {
+        this.nombreCompleto = NombreCompleto;
+        this.email = Email;
+        this.telefono = Telefono;
+        this.fechaRegistro = FechaRegistro;
+        this.rol = Rol;
+        this.password = contraseñaHash ; 
+    }
+    
     public USUARIO(String NombreCompleto, String Email, Long Telefono, LocalDate FechaRegistro, String Rol) {
         this.nombreCompleto = NombreCompleto;
         this.email = Email;
         this.telefono = Telefono;
         this.fechaRegistro = FechaRegistro;
         this.rol = Rol;
+        
     }
 
     public String getNombreCompleto() {
@@ -74,6 +81,14 @@ public class USUARIO implements Serializable {
 
     public void setNombreCompleto(String NombreCompleto) {
         this.nombreCompleto = NombreCompleto;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getEmail() {
@@ -108,12 +123,12 @@ public class USUARIO implements Serializable {
         this.rol = Rol;
     }
 
-    public Set<CITA> getCitas() {
-        return citas;
+    public CITA getCita() {
+        return cita;
     }
 
-    public void setCitas(Set<CITA> citas) {
-        this.citas = citas;
+    public void setCita(CITA cita) {
+        this.cita = cita;
     }
 
     public Long getId() {

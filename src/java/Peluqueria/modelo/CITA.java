@@ -53,8 +53,8 @@ public class CITA implements Serializable {
 
     //RELACION 1---1 (UNA CITA PERTENECE SOLO A UN USUARIO Y UN USUARIO SOLO TIENE UNA CITA
     // CORRECCIÓN: Nombre del campo en minúscula para seguir convención Java
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false, unique = true)
     private USUARIO usuario;  // <-- Cambio a camelCase
 
     @ManyToMany(fetch = FetchType.LAZY)

@@ -19,6 +19,7 @@ import jakarta.transaction.UserTransaction;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import Peluqueria.Utilidades.Contraseñas;
 
 /**
  *
@@ -212,16 +213,23 @@ public class ControladorUsuarios extends HttpServlet {
             Long Telefono = Long.parseLong(request.getParameter("Telefono"));
             String Rol = request.getParameter("Rol");
 
-            Query consulta = em.createNativeQuery(
-                    "SELECT * FROM USUARIOS WHERE NOMBRECOMPLETO = ?", USUARIO.class);
+            String passwordPlana = request.getParameter("password");
+            if (passwordPlana == null || passwordPlana.isEmpty()) {
+                throw new Exception("La contraseña no puede estar vacía.");
+            }
 
-            consulta.setParameter(1, NombreCompleto);
+            String contraseñaHash = Contraseñas.hashPassword(passwordPlana);
+
+            Query consulta = em.createNativeQuery(
+                    "SELECT * FROM USUARIOS WHERE EMAIL = ?", USUARIO.class);
+
+            consulta.setParameter(1, Email);
 
             List<USUARIO> usuario_encontrado = consulta.getResultList();
 
             if (usuario_encontrado.isEmpty() == true) {
 
-                USUARIO usuario_a_crear = new USUARIO(NombreCompleto, Email, Telefono, fechaRegistro, Rol);
+                USUARIO usuario_a_crear = new USUARIO(NombreCompleto, Email, Telefono, fechaRegistro, Rol, contraseñaHash);
 
                 em.persist(usuario_a_crear);
 
@@ -251,15 +259,15 @@ public class ControladorUsuarios extends HttpServlet {
 
     }
 
+    // REEMPLAZA ESTO EN TU ControladorUsuarios.java
+// (Asegúrate de tener: import Peluqueria.util.PasswordUtils;)
     private void ActualizarUsuario(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        //HAY QUE HACER ESTO YA QUE SI UNA PERSONA PONE DIRECTAMENTE LA URL
-        //NO POSEE UN ID Y EL REQUEST.GETPARAMETER DARA ERROR 
         String StringId = request.getParameter("id");
         Long id = null;
         String error = null;
 
-        if (StringId != null && StringId.isEmpty() == false) {
+        if (StringId != null && !StringId.isEmpty()) {
             try {
                 id = Long.parseLong(StringId);
             } catch (Exception e) {
@@ -269,24 +277,45 @@ public class ControladorUsuarios extends HttpServlet {
             error = "NO SE ESPECIFICÓ NINGUN ID";
         }
 
-        try {
-            transaccion.begin();
+        // Si el ID es inválido, salimos rápido
+        if (id == null) {
+            request.setAttribute("error", error);
+            request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_usuario.jsp").forward(request, response);
+            return; // Detener
+        }
 
+        try {
+            // --- 1. RECOGER DATOS (FUERA DE LA TRANSACCIÓN) ---
             String NombreCompleto = request.getParameter("NombreCompleto");
-            LocalDate fechaRegistro = LocalDate.now();
             String Email = request.getParameter("Email");
             Long Telefono = Long.parseLong(request.getParameter("Telefono"));
             String Rol = request.getParameter("Rol");
 
+            // --- ¡AQUÍ LA NUEVA LÓGICA DE CONTRASEÑA! ---
+            String passwordPlana = request.getParameter("password");
+            // ------------------------------------------
+
+            // --- 2. INICIAR TRANSACCIÓN ---
+            transaccion.begin();
             USUARIO usuario = em.find(USUARIO.class, id);
 
             if (usuario != null) {
 
+                // Actualizar datos básicos
                 usuario.setNombreCompleto(NombreCompleto);
-                usuario.setFechaRegistro(fechaRegistro);
                 usuario.setEmail(Email);
                 usuario.setTelefono(Telefono);
                 usuario.setRol(Rol);
+                // (Ya no actualizamos la fecha de registro, ¡correcto!)
+
+                // --- ¡ACTUALIZAR LA CONTRASEÑA (SOLO SI SE PROPORCIONÓ UNA NUEVA)! ---
+                if (passwordPlana != null && !passwordPlana.isEmpty()) {
+                    System.out.println("LOG: Actualizando contraseña para el usuario " + id);
+                    String contraseñaHash = Contraseñas.hashPassword(passwordPlana);
+                    usuario.setPassword(contraseñaHash);
+                }
+                // (Si 'passwordPlana' está vacía, no hacemos nada y se conserva la antigua)
+                // -----------------------------------------------------------------
 
                 transaccion.commit();
             } else {
@@ -294,34 +323,34 @@ public class ControladorUsuarios extends HttpServlet {
                 error = "USUARIO NO ENCONTRADO";
             }
 
+        } catch (NumberFormatException e) {
+            error = "Error de formato: El teléfono debe ser un número.";
+            // No hay rollback aquí
         } catch (Exception e) {
-            error = "ERROR AL ACTUALIZAR EL USUARIO";
-
+            error = "ERROR AL ACTUALIZAR EL USUARIO: " + e.getMessage();
             try {
-                transaccion.rollback();
+                if (transaccion.getStatus() == jakarta.transaction.Status.STATUS_ACTIVE) {
+                    transaccion.rollback();
+                }
             } catch (Exception e2) {
                 error = "ERROR EN LA TRANSACCION";
             }
         }
 
         if (error != null) {
-
+            // Si hay un error, volvemos al formulario con el mensaje
+            request.setAttribute("error", error);
             if (id != null) {
                 USUARIO UsuarioOriginal = em.find(USUARIO.class, id);
                 request.setAttribute("usuario", UsuarioOriginal);
             }
-
             request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_usuario.jsp").forward(request, response);
         } else {
+            // ¡Éxito!
             response.sendRedirect(request.getContextPath() + "/Admin/Usuarios/Listar");
         }
     }
-    
-    
-    
-    
-    
-    
+
     private void EliminarUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         //HAY QUE HACER ESTO YA QUE SI UNA PERSONA PONE DIRECTAMENTE LA URL

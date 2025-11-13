@@ -4,8 +4,9 @@
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <jta-data-source>jdbc/Peluqueria_DB</jta-data-source>
     <class>Peluqueria.modelo.CITA</class>
-    <class>Peluqueria.modelo.USUARIO</class>
     <class>Peluqueria.modelo.SERVICIO</class>
+    <class>Peluqueria.modelo.USUARIO</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="jakarta.persistence.schema-generation.database.action" value="create"/>
       <property name="eclipselink.ddl-generation-data-source" value="jdbc/Peluqueria_DB"/>
