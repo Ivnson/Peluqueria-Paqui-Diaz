@@ -47,7 +47,6 @@ public class CITA implements Serializable {
     @Column(name = "Fecha", nullable = false)
     private LocalDate fecha;  // <-- Cambio a camelCase
 
-    
     @Column(name = "HoraInicio", nullable = false)
     private LocalTime horaInicio;  // <-- Cambio a camelCase
 
@@ -57,7 +56,7 @@ public class CITA implements Serializable {
     @JoinColumn(name = "usuario_id", nullable = false, unique = true)
     private USUARIO usuario;  // <-- Cambio a camelCase
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "Cita_Servicio",
             joinColumns = @JoinColumn(name = "idCita", referencedColumnName = "id"),

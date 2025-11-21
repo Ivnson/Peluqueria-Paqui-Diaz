@@ -62,7 +62,7 @@ public class Login extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/Admin/Panel");
                 } else {
                     // (Aquí iría tu futuro dashboard de cliente)
-                    response.sendRedirect(request.getContextPath()); 
+                    response.sendRedirect(request.getContextPath() + "/Perfil/Panel"); 
                 }
                 return; // ¡Importante! Salir del método tras redirigir
 

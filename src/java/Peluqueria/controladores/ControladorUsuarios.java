@@ -291,9 +291,9 @@ public class ControladorUsuarios extends HttpServlet {
             Long Telefono = Long.parseLong(request.getParameter("Telefono"));
             String Rol = request.getParameter("Rol");
 
-            // --- ¡AQUÍ LA NUEVA LÓGICA DE CONTRASEÑA! ---
+           
             String passwordPlana = request.getParameter("password");
-            // ------------------------------------------
+            
 
             // --- 2. INICIAR TRANSACCIÓN ---
             transaccion.begin();
@@ -306,7 +306,7 @@ public class ControladorUsuarios extends HttpServlet {
                 usuario.setEmail(Email);
                 usuario.setTelefono(Telefono);
                 usuario.setRol(Rol);
-                // (Ya no actualizamos la fecha de registro, ¡correcto!)
+                
 
                 // --- ¡ACTUALIZAR LA CONTRASEÑA (SOLO SI SE PROPORCIONÓ UNA NUEVA)! ---
                 if (passwordPlana != null && !passwordPlana.isEmpty()) {
@@ -314,9 +314,7 @@ public class ControladorUsuarios extends HttpServlet {
                     String contraseñaHash = Contraseñas.hashPassword(passwordPlana);
                     usuario.setPassword(contraseñaHash);
                 }
-                // (Si 'passwordPlana' está vacía, no hacemos nada y se conserva la antigua)
-                // -----------------------------------------------------------------
-
+               
                 transaccion.commit();
             } else {
                 transaccion.rollback();
@@ -346,7 +344,7 @@ public class ControladorUsuarios extends HttpServlet {
             }
             request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_usuario.jsp").forward(request, response);
         } else {
-            // ¡Éxito!
+           
             response.sendRedirect(request.getContextPath() + "/Admin/Usuarios/Listar");
         }
     }

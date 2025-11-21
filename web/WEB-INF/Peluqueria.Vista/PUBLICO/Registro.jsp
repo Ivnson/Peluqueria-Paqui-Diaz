@@ -41,7 +41,7 @@
                 
                 <%-- 5. Formulario de Registro --%>
                 <%-- Apunta al servlet de /registro --%>
-                <form action="${pageContext.request.contextPath}/registro" method="POST">
+                <form action="${pageContext.request.contextPath}/Registro" method="POST">
                     
                     <div class="form-group">
                         <input type="text" id="reg_nombre" name="NombreCompleto" placeholder="Nombre Completo" required>
