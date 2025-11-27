@@ -85,5 +85,36 @@
                 </div>
             </form>
         </div>
+
+        <script>
+            function validarFormulario() {
+                const email = document.getElementById('Email').value;
+                const telefono = document.getElementById('Telefono').value;
+
+                // Validar email
+                if (!email.includes('@')) {
+                    alert('El email debe contener el símbolo "@"');
+                    return false;
+                }
+
+                // Validar teléfono
+                const telefonoStr = telefono.toString().trim();
+                if (telefonoStr.length !== 9 || !/^\d+$/.test(telefonoStr)) {
+                    alert('El teléfono debe tener exactamente 9 números');
+                    return false;
+                }
+
+                return true;
+            }
+
+
+            document.querySelector('form').onsubmit = validarFormulario;
+        </script>
+
+
+
     </body>
+
+
+
 </html>

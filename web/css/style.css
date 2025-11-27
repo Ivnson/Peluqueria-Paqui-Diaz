@@ -11,121 +11,121 @@
   tocando solo un sitio.
 */
 :root {
-  --color-principal: #88D4C0; /* Este es tu Verde Agua */
-  --color-secundario: #3a9f8a; /* Un verde más oscuro para contraste */
-  --color-texto: #333333;     /* Un gris oscuro (mejor que negro puro) */
-  --color-fondo: #FFFFFF;      /* Blanco */
-  --color-fondo-sutil: #f8f8f8; /* Un gris muy claro para secciones */
+    --color-principal: #88D4C0; /* Este es tu Verde Agua */
+    --color-secundario: #3a9f8a; /* Un verde más oscuro para contraste */
+    --color-texto: #333333;     /* Un gris oscuro (mejor que negro puro) */
+    --color-fondo: #FFFFFF;      /* Blanco */
+    --color-fondo-sutil: #f8f8f8; /* Un gris muy claro para secciones */
 
-  --fuente-titulos: 'Raleway', sans-serif;
-  --fuente-cuerpo: 'Lato', sans-serif;
+    --fuente-titulos: 'Raleway', sans-serif;
+    --fuente-cuerpo: 'Lato', sans-serif;
 }
 
 /* Un "reset" básico para que todos los navegadores
   empiecen desde el mismo punto.
 */
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 /* --- 2. ESTILOS GENERALES (BODY) --- */
 
 body {
-  font-family: var(--fuente-cuerpo);
-  color: var(--color-texto);
-  background-color: var(--color-fondo);
-  line-height: 1.6; /* Espacio entre líneas para mejor lectura */
+    font-family: var(--fuente-cuerpo);
+    color: var(--color-texto);
+    background-color: var(--color-fondo);
+    line-height: 1.6; /* Espacio entre líneas para mejor lectura */
 
- /*background-image: url('imagenes/fondo-floral-suave.png');
-  background-repeat: no-repeat;
-  background-position: top right;
-  background-attachment: fixed; 
-  background-size: 300px;*/
+    /*background-image: url('imagenes/fondo-floral-suave.png');
+     background-repeat: no-repeat;
+     background-position: top right;
+     background-attachment: fixed; 
+     background-size: 300px;*/
 }
 
 /* --- 3. ENCABEZADO Y NAVEGACIÓN --- */
 
 header {
-  display: flex; /* Pone el logo y el menú en la misma línea */
-  justify-content: space-between; /* Logo a la izq, menú a la der */
-  align-items: center; /* Centra verticalmente */
-  padding: 20px 40px; /* 20px arriba/abajo, 40px izq/der */
-  border-bottom: 2px solid var(--color-fondo-sutil);
-  background-color: var(--color-fondo);
+    display: flex; /* Pone el logo y el menú en la misma línea */
+    justify-content: space-between; /* Logo a la izq, menú a la der */
+    align-items: center; /* Centra verticalmente */
+    padding: 20px 40px; /* 20px arriba/abajo, 40px izq/der */
+    border-bottom: 2px solid var(--color-fondo-sutil);
+    background-color: var(--color-fondo);
 }
 
 header h1 {
-  font-family: var(--fuente-titulos);
-  color: var(--color-secundario);
-  font-size: 1.8em;
-  margin: 0; /* Quitamos margen al H1 del header */
+    font-family: var(--fuente-titulos);
+    color: var(--color-secundario);
+    font-size: 1.8em;
+    margin: 0; /* Quitamos margen al H1 del header */
 }
 
 nav ul {
-  list-style: none; /* Quita los puntos de la lista */
-  display: flex; /* Pone los elementos del menú en línea */
+    list-style: none; /* Quita los puntos de la lista */
+    display: flex; /* Pone los elementos del menú en línea */
 }
 
 nav ul li {
-  margin-left: 25px; /* Espacio entre elementos del menú */
+    margin-left: 25px; /* Espacio entre elementos del menú */
 }
 
 nav ul li a {
-  text-decoration: none; /* Quita el subrayado de los enlaces */
-  color: var(--color-texto);
-  font-weight: bold;
-  font-size: 1.1em;
-  padding-bottom: 5px;
-  transition: all 0.3s ease; /* Animación suave */
+    text-decoration: none; /* Quita el subrayado de los enlaces */
+    color: var(--color-texto);
+    font-weight: bold;
+    font-size: 1.1em;
+    padding-bottom: 5px;
+    transition: all 0.3s ease; /* Animación suave */
 }
 
 /* Efecto "hover" (cuando pasas el ratón por encima) */
 nav ul li a:hover {
-  color: var(--color-principal);
-  border-bottom: 3px solid var(--color-principal);
+    color: var(--color-principal);
+    border-bottom: 3px solid var(--color-principal);
 }
 
 
 /* --- 4. CONTENIDO PRINCIPAL Y SECCIONES --- */
 
 main {
-  /* Esto es para que el contenido principal no ocupe toda la pantalla
-     en monitores muy grandes, se verá centrado y más legible. */
-  max-width: 1100px;
-  margin: 0 auto; /* Centra el 'main' en la página */
-  padding: 20px;
+    /* Esto es para que el contenido principal no ocupe toda la pantalla
+       en monitores muy grandes, se verá centrado y más legible. */
+    max-width: 1100px;
+    margin: 0 auto; /* Centra el 'main' en la página */
+    padding: 20px;
 }
 
 section {
-  padding: 40px 20px; /* Espacio interno en todas las secciones */
-  margin-bottom: 30px; /* Espacio entre secciones */
+    padding: 40px 20px; /* Espacio interno en todas las secciones */
+    margin-bottom: 30px; /* Espacio entre secciones */
 }
 
 /* Estilo para los títulos de cada sección (H3) */
 section h3 {
-  font-family: var(--fuente-titulos);
-  font-size: 2.5em;
-  color: var(--color-secundario);
-  text-align: center;
-  margin-bottom: 30px;
-  border-bottom: 3px solid var(--color-principal);
-  display: inline-block; /* Para que el borde no ocupe toda la línea */
-  padding-bottom: 10px;
+    font-family: var(--fuente-titulos);
+    font-size: 2.5em;
+    color: var(--color-secundario);
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 3px solid var(--color-principal);
+    display: inline-block; /* Para que el borde no ocupe toda la línea */
+    padding-bottom: 10px;
 }
 
 /* Centramos el contenedor del H3 */
 section h3 {
-  /* Esto es un truco para centrar un H3 
-     que tiene 'display: inline-block' */
-  display: block;
-  text-align: center;
+    /* Esto es un truco para centrar un H3 
+       que tiene 'display: inline-block' */
+    display: block;
+    text-align: center;
 }
 section h3 span {
-  display: inline-block;
-  border-bottom: 3px solid var(--color-principal);
-  padding-bottom: 10px;
+    display: inline-block;
+    border-bottom: 3px solid var(--color-principal);
+    padding-bottom: 10px;
 }
 /* Para usar el H3 de arriba, tendrías que cambiar tu HTML de:
   <h3>Nuestros Servicios</h3>
@@ -135,14 +135,14 @@ section h3 span {
   ...Pero para no complicarte, usemos una versión más simple:
 */
 section h3 {
-  font-family: var(--fuente-titulos);
-  font-size: 2.5em;
-  color: var(--color-secundario);
-  text-align: center;
-  margin-bottom: 30px;
-  padding-bottom: 10px;
-  /* Creamos una línea de borde inferior sutil */
-  border-bottom: 2px solid var(--color-fondo-sutil); 
+    font-family: var(--fuente-titulos);
+    font-size: 2.5em;
+    color: var(--color-secundario);
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    /* Creamos una línea de borde inferior sutil */
+    border-bottom: 2px solid var(--color-fondo-sutil);
 }
 
 
@@ -150,42 +150,42 @@ section h3 {
 
 /* --- Sección "Hero" (Inicio) --- */
 #inicio {
-  text-align: center;
-  padding: 60px 20px;
+    text-align: center;
+    padding: 60px 20px;
 }
 
 #inicio h2 {
-  font-family: var(--fuente-titulos);
-  font-size: 3em; /* Título principal más grande */
-  color: var(--color-secundario);
+    font-family: var(--fuente-titulos);
+    font-size: 3em; /* Título principal más grande */
+    color: var(--color-secundario);
 }
 
 #inicio p {
-  font-size: 1.2em;
-  max-width: 600px;
-  margin: 15px auto; /* Centra el párrafo */
+    font-size: 1.2em;
+    max-width: 600px;
+    margin: 15px auto; /* Centra el párrafo */
 }
 
 /* Estilo del "Botón / Call to Action" */
 #inicio a {
-  display: inline-block;
-  background-color: var(--color-principal);
-  color: var(--color-fondo);
-  padding: 15px 30px;
-  text-decoration: none;
-  font-weight: bold;
-  font-family: var(--fuente-titulos);
-  border-radius: 30px; /* Botón redondeado */
-  margin-top: 20px;
-  font-size: 1.1em;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Sombra sutil */
+    display: inline-block;
+    background-color: var(--color-principal);
+    color: var(--color-fondo);
+    padding: 15px 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: var(--fuente-titulos);
+    border-radius: 30px; /* Botón redondeado */
+    margin-top: 20px;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Sombra sutil */
 }
 
 #inicio a:hover {
-  background-color: var(--color-secundario);
-  transform: translateY(-3px); /* Efecto de "levantarse" */
-  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    background-color: var(--color-secundario);
+    transform: translateY(-3px); /* Efecto de "levantarse" */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
 }
 
 /* --- Sección "Servicios" --- */
@@ -204,133 +204,133 @@ section h3 {
   ... Pero si NO quieres tocar el HTML, podemos hacerlo más simple:
 */
 #servicios article {
-  background-color: var(--color-fondo-sutil);
-  padding: 25px;
-  margin-bottom: 20px;
-  border-radius: 8px; /* Bordes redondeados */
-  border-left: 5px solid var(--color-principal); /* Acento de color */
+    background-color: var(--color-fondo-sutil);
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 8px; /* Bordes redondeados */
+    border-left: 5px solid var(--color-principal); /* Acento de color */
 }
 
 #servicios article h4 {
-  font-family: var(--fuente-titulos);
-  font-size: 1.5em;
-  color: var(--color-secundario);
-  margin-bottom: 10px;
+    font-family: var(--fuente-titulos);
+    font-size: 1.5em;
+    color: var(--color-secundario);
+    margin-bottom: 10px;
 }
 
 /* --- Sección "Galería" --- */
 #galeria {
-  text-align: center;
+    text-align: center;
 }
 /* Estilo para los 'div' que simulan las fotos */
 #galeria div {
-  border: 3px dashed var(--color-principal);
-  padding: 40px;
-  margin: 20px auto;
-  max-width: 500px;
-  background-color: var(--color-fondo-sutil);
+   
+    padding: 40px;
+    margin: 20px auto;
+    max-width: 500px;
+    background-color: var(--color-fondo-sutil);
 }
 
 #galeria a {
-  /* Reutilizamos el estilo del botón principal */
-  display: inline-block;
-  background-color: var(--color-secundario);
-  color: var(--color-fondo);
-  padding: 10px 25px;
-  text-decoration: none;
-  font-weight: bold;
-  border-radius: 30px;
-  margin-top: 20px;
-  transition: all 0.3s ease;
+    /* Reutilizamos el estilo del botón principal */
+    display: inline-block;
+    background-color: var(--color-secundario);
+    color: var(--color-fondo);
+    padding: 10px 25px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 30px;
+    margin-top: 20px;
+    transition: all 0.3s ease;
 }
 
 #galeria a:hover {
-  background-color: var(--color-principal);
+    background-color: var(--color-principal);
 }
 
 
 /* --- 6. FORMULARIO DE CONTACTO --- */
 
 #contacto {
-  background-color: var(--color-fondo-sutil);
-  padding: 40px;
-  border-radius: 8px;
+    background-color: var(--color-fondo-sutil);
+    padding: 40px;
+    border-radius: 8px;
 }
 
 #contacto ul {
-  list-style: none; /* Quita viñetas de la info de contacto */
-  margin-bottom: 30px;
+    list-style: none; /* Quita viñetas de la info de contacto */
+    margin-bottom: 30px;
 }
 
 #contacto ul li {
-  font-size: 1.1em;
-  margin-bottom: 10px;
+    font-size: 1.1em;
+    margin-bottom: 10px;
 }
 
 form div {
-  margin-bottom: 20px; /* Espacio entre cada campo del form */
+    margin-bottom: 20px; /* Espacio entre cada campo del form */
 }
 
 form label {
-  display: block; /* Pone la etiqueta (Ej. "Tu Nombre") en su propia línea */
-  margin-bottom: 5px;
-  font-weight: bold;
+    display: block; /* Pone la etiqueta (Ej. "Tu Nombre") en su propia línea */
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
 form input[type="text"],
 form input[type="email"],
 form textarea {
-  width: 100%; /* Ocupa todo el ancho disponible */
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-family: var(--fuente-cuerpo);
-  font-size: 1em;
+    width: 100%; /* Ocupa todo el ancho disponible */
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: var(--fuente-cuerpo);
+    font-size: 1em;
 }
 
 form button[type="submit"] {
-  /* Reutilizamos el estilo del botón principal */
-  display: inline-block;
-  background-color: var(--color-principal);
-  color: var(--color-fondo);
-  padding: 15px 30px;
-  text-decoration: none;
-  font-weight: bold;
-  font-family: var(--fuente-titulos);
-  border-radius: 30px;
-  border: none; /* Quitamos borde feo del botón */
-  cursor: pointer; /* Manita al pasar por encima */
-  font-size: 1.1em;
-  transition: all 0.3s ease;
+    /* Reutilizamos el estilo del botón principal */
+    display: inline-block;
+    background-color: var(--color-principal);
+    color: var(--color-fondo);
+    padding: 15px 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: var(--fuente-titulos);
+    border-radius: 30px;
+    border: none; /* Quitamos borde feo del botón */
+    cursor: pointer; /* Manita al pasar por encima */
+    font-size: 1.1em;
+    transition: all 0.3s ease;
 }
 
 form button[type="submit"]:hover {
-  background-color: var(--color-secundario);
+    background-color: var(--color-secundario);
 }
 
 
 /* --- 7. PIE DE PÁGINA (FOOTER) --- */
 
 footer {
-  text-align: center;
-  padding: 30px;
-  margin-top: 40px;
-  background-color: var(--color-texto); /* Pie de página oscuro */
-  color: #f0f0f0; /* Texto claro */
+    text-align: center;
+    padding: 30px;
+    margin-top: 40px;
+    background-color: var(--color-texto); /* Pie de página oscuro */
+    color: #f0f0f0; /* Texto claro */
 }
 
 footer p {
-  margin: 10px 0;
+    margin: 10px 0;
 }
 
 footer a {
-  color: var(--color-principal); /* Enlaces del footer en verde agua */
-  text-decoration: none;
-  font-weight: bold;
+    color: var(--color-principal); /* Enlaces del footer en verde agua */
+    text-decoration: none;
+    font-weight: bold;
 }
 
 footer a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 /* --- 8. (Opcional) SEPARADORES --- */
@@ -339,5 +339,51 @@ footer a:hover {
   con márgenes y padding.
 */
 hr {
-  display: none;
+    display: none;
+}
+
+/* --- 9. AJUSTE DE TAMAÑO Y ESTILO DEL CARRUSEL (REFORZADO) --- */
+
+/* Usamos #galeria delante para darle más peso que a Bootstrap */
+#galeria #carouselExample {
+    max-width: 1200px !important; /* !important fuerza a ignorar el ancho de Bootstrap */
+    margin: 20px auto !important; /* Fuerza el centrado */
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* Forzamos el tamaño de la imagen ignorando la clase .w-100 de Bootstrap */
+#galeria #carouselExample .carousel-item img {
+    height: 500px !important;      /* Altura obligatoria */
+    width: 100% !important;        /* Ancho total del contenedor (que mide 800px) */
+    object-fit: cover !important;  /* Recorte obligatorio */
+    object-position: center top;
+}
+
+/* Ajuste del texto (Caption) */
+#galeria .carousel-caption {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    padding: 10px 20px;
+    bottom: 20px;
+    max-width: 90%;
+    margin: 0 auto;
+    left: 0; 
+    right: 0;
+}
+
+#galeria .carousel-caption h5 {
+    font-family: var(--fuente-titulos);
+    color: var(--color-principal);
+    font-weight: bold;
+    font-size: 1.5em;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* Ajuste para móviles */
+@media (max-width: 768px) {
+    #galeria #carouselExample .carousel-item img {
+        height: 350px !important; /* Altura menor forzada en móvil */
+    }
 }

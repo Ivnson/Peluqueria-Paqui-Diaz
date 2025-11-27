@@ -13,17 +13,52 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin_usuarios.css">
         <title>Peluqueria Paqui Diaz</title>
+
+        <style>
+            .btn-panel {
+                padding: 10px 18px;
+                background-color: #95a5a6; /* Color gris profesional */
+                color: var(--blanco);
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.2s ease-out;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .btn-panel:hover {
+                background-color: #7f8c8d; /* Gris más oscuro al hover */
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                color: var(--blanco);
+                text-decoration: none;
+            }
+
+            .header-buttons {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+        </style>
+
+
     </head>
     <body>
 
         <div class="container">
             <header>
                 <h1>Gestión de Usuarios</h1>
-                <a href="${pageContext.request.contextPath}/Admin/Usuarios/Nuevo" class="btn-crear">
-                    + Crear Nuevo Usuario
-                </a>
+                <div class="header-buttons">
+                    <a href="${pageContext.request.contextPath}/Admin/Panel" class="btn-panel">
+                        Volver al Panel
+                    </a>
+                    <a href="${pageContext.request.contextPath}/Admin/Usuarios/Nuevo" class="btn-crear">
+                        Crear Nuevo Usuario
+                    </a>
+                </div>
             </header>
-
 
             <div class="table-wrapper">
                 <table>

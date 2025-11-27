@@ -69,6 +69,7 @@ header h1 span {
     border-radius: 6px;
     font-weight: 600;
     transition: background-color 0.2s ease-out;
+    margin-left: 10px ; 
 }
 .btn-logout:hover {
     background-color: #d1d9e0;

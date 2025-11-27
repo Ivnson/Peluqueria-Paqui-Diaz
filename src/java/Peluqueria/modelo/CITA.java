@@ -20,6 +20,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -35,7 +36,8 @@ import java.util.Set;
  * @author ivan
  */
 @Entity
-@Table(name = "Cita")
+@Table(name = "Cita" , uniqueConstraints = @UniqueConstraint(columnNames = {"fecha", "horaInicio"}))
+
 public class CITA implements Serializable {
 
     private static final long serialVersionUID = 1L;

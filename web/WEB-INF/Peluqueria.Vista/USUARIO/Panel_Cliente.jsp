@@ -43,15 +43,19 @@
 
             <header>
                 <h1><span>Hola,</span> <%= nombreCliente%>!</h1>
-                <a href="${pageContext.request.contextPath}/Logout" class="btn-logout">Cerrar Sesión</a>
+                <div class="header-buttons">
+                    <a href="${pageContext.request.contextPath}/" class="btn-logout">
+                        Ir al Inicio
+                    </a>
+                    <a href="${pageContext.request.contextPath}/Logout" class="btn-logout">Cerrar Sesión</a>
+                </div>
             </header>
 
             <%
-                
 
                 if (citaActiva != null) {
-                    
-%>
+
+            %>
 
             <%-- Tarjetas de Estadísticas (Kudos) --%>
             <div class="kpi-grid">
@@ -119,7 +123,7 @@
 
             <%
             } else {
-                
+
             %>
 
             <div class="content-area">
@@ -148,8 +152,7 @@
 
             </div>
 
-            <%
-                } // Cierre del if/else citaActiva
+            <%                } // Cierre del if/else citaActiva
             %>
 
             <%-- --- 3. SECCIÓN DEL HISTORIAL DE CITAS (Abajo) --- --%>

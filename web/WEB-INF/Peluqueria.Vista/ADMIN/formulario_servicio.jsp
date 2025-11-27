@@ -82,12 +82,12 @@
 
                 <div class="form-group">
                     <label for="Duracion">Duración (en minutos):</label>
-                    <input type="number" id="Duracion" name="Duracion" value="<%= duracion%>" required>
+                    <input type="number" id="Duracion" name="Duracion" value="<%= duracion%>" min="1" required>
                 </div>
 
                 <div class="form-group">
                     <label for="Precio">Precio (€):</label>
-                    <input type="number" id="Precio" name="Precio" step="0.01" value="<%= precio%>" required>
+                    <input type="number" id="Precio" name="Precio" step="0.01" value="<%= precio%>" min="0.01" required>
                 </div>
 
                 <div class="button-group">

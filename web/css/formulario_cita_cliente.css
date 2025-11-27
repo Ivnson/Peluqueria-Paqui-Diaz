@@ -1,0 +1,437 @@
+/* formulario_cita_cliente.css - REDISEÑADO CON HEADER VERDE */
+
+:root {
+    --verde-principal: #3d9a85;
+    --verde-hover: #358a76;
+    --blanco: #ffffff;
+    --gris-fondo: #f5f7fa;
+    --gris-borde: #e5e7eb;
+    --gris-texto: #6b7280;
+    --texto-oscuro: #1f2937;
+    --sombra: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--gris-fondo);
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.form-container-horizontal {
+    background: var(--blanco);
+    border-radius: 16px;
+    box-shadow: var(--sombra);
+    width: 100%;
+    max-width: 900px;
+    overflow: hidden;
+}
+
+/* HEADER VERDE */
+.form-header {
+    background: linear-gradient(135deg, #3d9a85 0%, #4eb89e 100%);
+    color: white;
+    padding: 28px;
+    text-align: center;
+    border-radius: 16px 16px 0 0;
+}
+
+.form-header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+/* CONTENIDO - Dos columnas */
+.form-content {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 40px;
+    padding: 30px 40px;
+}
+
+.left-column, .right-column {
+    padding: 0;
+}
+
+/* TÍTULOS DE SECCIÓN */
+h2 {
+    color: var(--texto-oscuro);
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: none;
+    padding-bottom: 0;
+    margin: 0 0 16px 0;
+}
+
+/* ========== SERVICIOS ========== */
+.servicios-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 400px; /* Por si tienes muchos, que haga scroll */
+    overflow-y: auto;
+    padding: 5px;
+}
+
+.servicio-checkbox {
+    display: flex;           /* Alinea el check y el texto */
+    align-items: center;
+    padding: 15px;
+    border: 2px solid var(--gris-borde); /* Borde más visible */
+    border-radius: 10px;
+    background: var(--blanco);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+/* Animación Hover (pasar el ratón) */
+.servicio-checkbox:hover {
+    border-color: var(--verde-principal);
+    background-color: var(--verde-claro); /* Fondo suave */
+    transform: translateY(-2px); /* Se levanta un poco */
+}
+
+/* ESTADO SELECCIONADO (La magia) */
+/* Usamos :has() para pintar el borde del padre cuando el hijo está marcado */
+.servicio-checkbox:has(input:checked) {
+    border-color: var(--verde-principal);
+    background-color: #f0fdf9; /* Verde muy clarito */
+    box-shadow: 0 4px 12px rgba(58, 159, 138, 0.15);
+}
+
+/* Ocultar el checkbox feo por defecto */
+.servicio-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+/* EL CIRCULITO DEL CHECK (Personalizado) */
+.checkmark {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #ccc;
+    border-radius: 50%; /* Círculo */
+    margin-right: 15px;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0; /* Evita que se aplaste */
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cuando el input está marcado, cambiamos el circulito */
+.servicio-checkbox input:checked + .checkmark {
+    background: var(--verde-principal);
+    border-color: var(--verde-principal);
+}
+
+/* El símbolo del Tick (✓) */
+.servicio-checkbox input:checked + .checkmark::after {
+    content: '✓';
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    display: block;
+}
+
+/* Texto del servicio */
+.servicio-info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.95rem;
+}
+
+.servicio-nombre {
+    font-weight: 600;
+    color: var(--texto-oscuro);
+}
+
+.servicio-precio {
+    font-weight: 700;
+    color: var(--verde-principal);
+}
+
+/* ========== CALENDARIO ========== */
+.calendar-container {
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 20px;
+    background: var(--blanco);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.calendar-nav {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--gris-texto);
+    cursor: pointer;
+    padding: 5px 12px;
+    transition: color 0.2s;
+}
+
+.calendar-nav:hover {
+    color: var(--verde-principal);
+}
+
+.calendar-month-year {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--texto-oscuro);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.weekday {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gris-texto);
+    padding: 8px 0;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.day {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 14px;
+    color: var(--texto-oscuro);
+    transition: all 0.2s ease;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.day:hover:not(.empty):not(.disabled):not(.other-month) {
+    background-color: var(--gris-fondo);
+}
+
+.day.selected {
+    background-color: var(--verde-principal);
+    color: white;
+}
+
+.day.empty {
+    cursor: default;
+}
+
+.day.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.day.other-month {
+    color: #ccc;
+    cursor: default;
+}
+
+/* ========== HORAS ========== */
+#contenedorHoras {
+    margin-top: 24px;
+}
+
+#contenedorHoras h2 {
+    margin-bottom: 12px;
+}
+
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.time-slot {
+    border: 1px solid var(--gris-borde);
+    padding: 12px 8px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    background: var(--blanco);
+    color: var(--texto-oscuro);
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.time-slot:hover:not(.ocupado) {
+    border-color: var(--verde-principal);
+}
+
+.time-slot.selected {
+    background-color: var(--verde-principal);
+    color: white;
+    border-color: var(--verde-principal);
+}
+
+.time-slot.ocupado {
+    color: #ccc;
+    text-decoration: line-through;
+    cursor: not-allowed;
+    background: #fafafa;
+}
+
+.hora-radio {
+    display: none;
+}
+
+/* ========== BOTONES DE ACCIÓN ========== */
+.form-actions {
+    padding: 20px 40px 30px 40px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn {
+    padding: 12px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    background: #4b5563;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: #374151;
+}
+
+.btn-submit {
+    background: var(--verde-principal);
+    color: white;
+}
+
+.btn-submit:hover {
+    background: var(--verde-hover);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .form-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        padding: 20px;
+    }
+
+    .time-slots {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-actions {
+        padding: 20px;
+    }
+}
+
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.calendar-nav {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 5px 12px;
+    transition: color 0.2s;
+}
+
+.calendar-nav:hover {
+    color: #3d9a85;
+}
+
+.calendar-month-year {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.weekday {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    padding: 8px 0;
+}
+
+.day {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 14px;
+    color: #1f2937;
+    transition: all 0.2s ease;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.day:hover:not(.empty):not(.past) {
+    background-color: #f5f7fa;
+}
+
+.day.selected {
+    background-color: #3d9a85;
+    color: white;
+}
+
+.day.empty {
+    cursor: default;
+}
+
+.day.past {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.day.today {
+    border: 2px solid #3d9a85;
+}

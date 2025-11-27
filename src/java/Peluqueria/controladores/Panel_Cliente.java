@@ -21,9 +21,12 @@ import jakarta.transaction.UserTransaction;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @WebServlet(name = "Panel_Cliente", urlPatterns = {"/Perfil", "/Perfil/*"})
 public class Panel_Cliente extends HttpServlet {
@@ -53,20 +56,130 @@ public class Panel_Cliente extends HttpServlet {
                 mostrarFormularioEditar(request, response, usuarioLogueado); // <-- Corregido de "Editar"
                 break;
 
-            
             case "/Citas/Nueva":
                 // Esto es un GET, debe MOSTRAR el formulario
                 mostrarFormularioCitaCliente(request, response); // <-- Corregido de "CrearCita"
                 break;
-            
 
             case "/Citas/Historial":
                 mostrarHistorial(request, response, usuarioLogueado);
                 break;
+
+            case "/HorasOcupadas":
+                obtenerHorasOcupadas(request, response);
+                break;
+
             default:
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 break;
         }
+    }
+
+    private void obtenerHorasOcupadas(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+            String fechaParam = request.getParameter("fecha");
+            if (fechaParam == null || fechaParam.isEmpty()) {
+                response.getWriter().write("[]");
+                return;
+            }
+
+            LocalDate fecha = LocalDate.parse(fechaParam);
+
+            // 1. Generar los huecos posibles
+            List<LocalTime> slotsPosibles = generarHorariosParaDia(fecha);
+
+            // 2. Consultar qué horas están ocupadas en la BD
+            List<String> horasOcupadasStr = new ArrayList<>();
+            try {
+                TypedQuery<LocalTime> query = em.createQuery(
+                        "SELECT c.horaInicio FROM CITA c WHERE c.fecha = :fecha", LocalTime.class);
+                query.setParameter("fecha", fecha);
+
+                List<LocalTime> resultadosBD = query.getResultList();
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+                for (LocalTime horaBD : resultadosBD) {
+                    horasOcupadasStr.add(horaBD.format(formatter));
+                }
+            } catch (Exception e) {
+                System.err.println("Error consultando BD: " + e.getMessage());
+            }
+
+            // 3. Construir el JSON (Usamos "hora" en singular)
+            StringBuilder json = new StringBuilder("[");
+            DateTimeFormatter jsonFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            for (int i = 0; i < slotsPosibles.size(); i++) {
+                LocalTime slot = slotsPosibles.get(i);
+                String horaSlotStr = slot.format(jsonFormatter);
+
+                boolean estaOcupada = horasOcupadasStr.contains(horaSlotStr);
+                String estado = estaOcupada ? "ocupada" : "libre";
+
+                // CLAVE: Usamos "hora" aquí
+                json.append(String.format("{\"hora\": \"%s\", \"estado\": \"%s\"}", horaSlotStr, estado));
+
+                if (i < slotsPosibles.size() - 1) {
+                    json.append(",");
+                }
+            }
+            json.append("]");
+
+            response.getWriter().write(json.toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().write("[]");
+        }
+    }
+
+    // --- MÉTODO NUEVO CON TUS REGLAS DE NEGOCIO ---
+    // --- MÉTODO AUXILIAR: Define los horarios de apertura ---
+    private List<LocalTime> generarHorariosParaDia(LocalDate fecha) {
+        List<LocalTime> slots = new ArrayList<>();
+        java.time.DayOfWeek diaSemana = fecha.getDayOfWeek();
+
+        LocalTime inicio = null;
+        LocalTime fin = null;
+
+        switch (diaSemana) {
+            case MONDAY: // ¡Lunes Cerrado!
+            case SUNDAY: // ¡Domingo Cerrado!
+                return slots; // Devolvemos lista vacía = No hay huecos
+
+            case TUESDAY:   // Martes: 10:00 - 20:00
+            case THURSDAY:  // Jueves: 10:00 - 20:00
+            case FRIDAY:    // Viernes: 10:00 - 20:00
+                inicio = LocalTime.of(10, 0);
+                fin = LocalTime.of(20, 0);
+                break;
+
+            case WEDNESDAY: // Miércoles: 10:00 - 15:00
+                inicio = LocalTime.of(10, 0);
+                fin = LocalTime.of(15, 0);
+                break;
+
+            case SATURDAY:  // Sábado: 09:00 - 14:00
+                inicio = LocalTime.of(9, 0);
+                fin = LocalTime.of(14, 0);
+                break;
+        }
+
+        // Generamos los huecos cada 30 minutos
+        if (inicio != null && fin != null) {
+            LocalTime actual = inicio;
+            while (actual.isBefore(fin)) {
+                slots.add(actual);
+                actual = actual.plusMinutes(30);
+            }
+        }
+
+        return slots;
     }
 
     @Override
@@ -84,13 +197,11 @@ public class Panel_Cliente extends HttpServlet {
                 cancelarCita(request, response, usuarioLogueado);
                 break;
 
-            
             case "/Citas/Crear":
                 crearCitaCliente(request, response, usuarioLogueado);
                 break;
-            
 
-            case "/Actualizar": 
+            case "/Actualizar":
                 actualizarPerfilCliente(request, response, usuarioLogueado);
                 break;
             default:
@@ -99,7 +210,6 @@ public class Panel_Cliente extends HttpServlet {
         }
     }
 
-    
     private void mostrarDashboard(HttpServletRequest request, HttpServletResponse response, USUARIO usuario)
             throws ServletException, IOException {
 
@@ -121,7 +231,6 @@ public class Panel_Cliente extends HttpServlet {
                 // La cita ya pasó (ej. son las 11:27, la cita era a las 11:26)
                 System.out.println("LOG: Cita activa encontrada, pero ya expiró. Moviendo al historial...");
 
-                
                 try {
                     ut.begin();
                     // 1. "Guardar": Copiar a HISTORIAL_CITA
@@ -148,7 +257,6 @@ public class Panel_Cliente extends HttpServlet {
                     }
                 }
             }
-           
 
         } catch (NoResultException e) {
             citaActiva = null; // No tiene cita, es normal
@@ -157,7 +265,7 @@ public class Panel_Cliente extends HttpServlet {
         }
 
         try {
-            
+
             TypedQuery<HISTORIAL_CITA> historialQuery = em.createQuery(
                     "SELECT h FROM HISTORIAL_CITA h LEFT JOIN FETCH h.serviciosSet WHERE h.usuario.id = :usuarioId ORDER BY h.fecha DESC", HISTORIAL_CITA.class);
             historialQuery.setParameter("usuarioId", usuario.getId());
@@ -173,29 +281,53 @@ public class Panel_Cliente extends HttpServlet {
 
     private void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response, USUARIO usuario)
             throws ServletException, IOException {
-       
+
         request.setAttribute("usuario", usuario);
         request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/USUARIO/perfil_Cliente.jsp").forward(request, response);
     }
 
-    
     private void mostrarFormularioCitaCliente(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         try {
             TypedQuery<SERVICIO> consultaServicios = em.createQuery("SELECT s FROM SERVICIO s", SERVICIO.class);
-            request.setAttribute("servicios", consultaServicios.getResultList()); // (Tu JSP espera "servicios" [cite: 142])
+            request.setAttribute("servicios", consultaServicios.getResultList());
+
+            // CORREGIDO: Usar el nuevo nombre del método
+            LocalDate hoy = LocalDate.now();
+            List<String> horasOcupadas = obtenerHorasOcupadasParaFecha(hoy);
+            request.setAttribute("horasOcupadas", horasOcupadas);
+
         } catch (Exception e) {
-            request.setAttribute("error", "No se pudieron cargar los servicios.");
+            request.setAttribute("error", "No se pudieron cargar los servicios o las horas.");
         }
 
         request.setAttribute("modo", "crearCliente");
-      
         request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/USUARIO/formulario_cita_cliente.jsp").forward(request, response);
+    }
+
+    // En Panel_Cliente.java - REEMPLAZA el método obtenerHorasOcupadas(LocalDate) por este:
+    private List<String> obtenerHorasOcupadasParaFecha(LocalDate fecha) {
+        try {
+            TypedQuery<LocalTime> query = em.createQuery(
+                    "SELECT c.horaInicio FROM CITA c WHERE c.fecha = :fecha", LocalTime.class);
+            query.setParameter("fecha", fecha);
+
+            List<LocalTime> horas = query.getResultList();
+            List<String> horasStr = new ArrayList<>();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+            for (LocalTime h : horas) {
+                horasStr.add(h.format(formatter));
+            }
+            return horasStr;
+        } catch (Exception e) {
+            System.err.println("Error al obtener horas ocupadas para fecha: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     private void mostrarHistorial(HttpServletRequest request, HttpServletResponse response, USUARIO usuario)
             throws ServletException, IOException {
-       
+
         try {
             TypedQuery<HISTORIAL_CITA> historialQuery = em.createQuery(
                     "SELECT h FROM HISTORIAL_CITA h LEFT JOIN FETCH h.serviciosSet WHERE h.usuario.id = :usuarioId ORDER BY h.fecha DESC", HISTORIAL_CITA.class);
@@ -210,7 +342,6 @@ public class Panel_Cliente extends HttpServlet {
     // --- MÉTODOS POST ---
     private void cancelarCita(HttpServletRequest request, HttpServletResponse response, USUARIO usuario)
             throws ServletException, IOException {
-       
 
         String idCitaStr = request.getParameter("idCita");
         Long idCita = Long.parseLong(idCitaStr);
@@ -242,13 +373,13 @@ public class Panel_Cliente extends HttpServlet {
         if (msg != null) {
             request.getSession().setAttribute("successMsg", msg);
         }
-        
+
         response.sendRedirect(request.getContextPath() + "/Perfil/Panel");
     }
 
     private void actualizarPerfilCliente(HttpServletRequest request, HttpServletResponse response, USUARIO usuarioLogueado)
             throws ServletException, IOException {
-        
+
         String error = null;
 
         try {
@@ -286,16 +417,26 @@ public class Panel_Cliente extends HttpServlet {
         }
     }
 
-   
     private void crearCitaCliente(HttpServletRequest request, HttpServletResponse response, USUARIO usuarioLogueado)
             throws ServletException, IOException {
 
         String error = null;
+        boolean transactionCommitted = false;
 
         try {
             System.out.println("=== INICIANDO CREACIÓN DE CITA CLIENTE ===");
 
-            // 1. Recoger y validar parámetros con debugging
+            // DEBUG: Mostrar todos los parámetros recibidos
+            System.out.println("=== PARÁMETROS RECIBIDOS ===");
+            java.util.Enumeration<String> paramNames = request.getParameterNames();
+            while (paramNames.hasMoreElements()) {
+                String paramName = paramNames.nextElement();
+                String[] paramValues = request.getParameterValues(paramName);
+                System.out.println(paramName + ": " + java.util.Arrays.toString(paramValues));
+            }
+            System.out.println("=== FIN PARÁMETROS ===");
+
+            // 1. Recoger y validar parámetros
             LocalDate Fecha = null;
             LocalTime HoraInicio = null;
             String[] Ids_de_servicios = null;
@@ -303,18 +444,57 @@ public class Panel_Cliente extends HttpServlet {
             try {
                 String fechaParam = request.getParameter("fecha");
                 System.out.println("Fecha recibida: '" + fechaParam + "'");
+
+                if (fechaParam == null || fechaParam.trim().isEmpty()) {
+                    error = "La fecha es obligatoria";
+                    throw new Exception(error);
+                }
+
                 Fecha = LocalDate.parse(fechaParam);
+
+                // Validar que la fecha no sea pasada
+                if (Fecha.isBefore(LocalDate.now())) {
+                    error = "No se pueden agendar citas en fechas pasadas";
+                    throw new Exception(error);
+                }
+
             } catch (Exception e) {
-                error = "Fecha no válida. Formato esperado: YYYY-MM-DD";
+                if (error == null) {
+                    error = "Fecha no válida. Formato esperado: YYYY-MM-DD";
+                }
                 throw new Exception(error);
             }
 
             try {
-                String horaParam = request.getParameter("HoraInicio");
+                String horaParam = request.getParameter("horaInicio");
                 System.out.println("Hora recibida: '" + horaParam + "'");
+
+                if (horaParam == null || horaParam.trim().isEmpty()) {
+                    error = "La hora es obligatoria";
+                    throw new Exception(error);
+                }
+
                 HoraInicio = LocalTime.parse(horaParam);
+
+                // Obtener horas laborales del día seleccionado
+                List<LocalTime> horasDia = generarHorariosParaDia(Fecha);
+
+                // Validar que la hora esté dentro del horario generado
+                if (!horasDia.contains(HoraInicio)) {
+                    error = "La hora seleccionada no es válida para el horario del día.";
+                    throw new Exception(error);
+                }
+
+                // Validar horario laboral (9:00 - 13:00)
+                /*if (HoraInicio.isBefore(LocalTime.of(10, 0))
+                        || HoraInicio.isAfter(LocalTime.of(13, 0))) {
+                    error = "El horario debe estar entre 09:00 y 13:00";
+                    throw new Exception(error);
+                }*/
             } catch (Exception e) {
-                error = "Hora no válida. Formato esperado: HH:MM";
+                if (error == null) {
+                    error = "Hora no válida. Formato esperado: HH:MM";
+                }
                 throw new Exception(error);
             }
 
@@ -326,17 +506,46 @@ public class Panel_Cliente extends HttpServlet {
                 throw new Exception(error);
             }
 
+            // --- NUEVA VALIDACIÓN DE DISPONIBILIDAD ---
+            // 1. Consultar si ya existe una cita en esa fecha y hora
+            TypedQuery<Long> checkQuery = em.createQuery(
+                    "SELECT COUNT(c) FROM CITA c WHERE c.fecha = :fecha AND c.horaInicio = :hora", Long.class);
+            checkQuery.setParameter("fecha", Fecha);
+            checkQuery.setParameter("hora", HoraInicio);
+
+            Long count = checkQuery.getSingleResult();
+
+            if (count > 0) {
+                // ¡Ya existe! Lanzamos nuestro propio error controlado
+                throw new Exception("Lo sentimos, la hora " + HoraInicio + " del día " + Fecha + " ya está ocupada. Por favor, elige otra.");
+            }
+            // ------------------------------------------
+
             // 2. Iniciar transacción
             ut.begin();
             System.out.println("Transacción iniciada");
 
-            // 3. Refrescar usuario desde BD
+            // 3. Refrescar usuario desde BD (IMPORTANTE: dentro de la transacción)
             USUARIO usuario = em.find(USUARIO.class, usuarioLogueado.getId());
+            if (usuario == null) {
+                error = "Usuario no encontrado en la base de datos";
+                throw new Exception(error);
+            }
             System.out.println("Usuario cargado: " + usuario.getNombreCompleto());
 
-            // 4. Verificar cita existente
-            CITA cita_antigua = usuario.getCita();
-            System.out.println("Cita existente: " + (cita_antigua != null ? "SÍ (ID: " + cita_antigua.getId() + ")" : "NO"));
+            // 4. Verificar cita existente del usuario (para evitar múltiples citas)
+            CITA cita_antigua = null;
+            try {
+                // Consulta más específica para evitar problemas de caché
+                TypedQuery<CITA> query = em.createQuery(
+                        "SELECT c FROM CITA c WHERE c.usuario.id = :usuarioId", CITA.class);
+                query.setParameter("usuarioId", usuario.getId());
+                cita_antigua = query.getSingleResult();
+            } catch (NoResultException e) {
+                cita_antigua = null;
+            }
+
+            System.out.println("Cita existente del usuario: " + (cita_antigua != null ? "SÍ (ID: " + cita_antigua.getId() + ")" : "NO"));
 
             if (cita_antigua != null) {
                 LocalDateTime fechaHoraCitaAntigua = LocalDateTime.of(cita_antigua.getFecha(), cita_antigua.getHoraInicio());
@@ -363,15 +572,17 @@ public class Panel_Cliente extends HttpServlet {
                 }
             }
 
-            // 5. Crear Set de servicios
+            // 5. Crear Set de servicios (asegurarse de que están managed)
             Set<SERVICIO> ServiciosParaCita = new HashSet<>();
             for (String idServicio : Ids_de_servicios) {
                 try {
                     Long id = Long.parseLong(idServicio);
                     SERVICIO servicio = em.find(SERVICIO.class, id);
                     if (servicio != null) {
-                        ServiciosParaCita.add(servicio);
-                        System.out.println("Servicio añadido: " + servicio.getNombreServicio());
+                        // Asegurarse de que el servicio esté managed
+                        SERVICIO managedServicio = em.merge(servicio);
+                        ServiciosParaCita.add(managedServicio);
+                        System.out.println("Servicio añadido: " + managedServicio.getNombreServicio());
                     } else {
                         System.out.println("Servicio no encontrado ID: " + id);
                     }
@@ -388,12 +599,29 @@ public class Panel_Cliente extends HttpServlet {
             // 6. Crear nueva cita
             System.out.println("Creando nueva cita...");
             CITA NuevaCita = new CITA(Fecha, HoraInicio, usuario);
+
+            // Establecer la relación bidireccional
             NuevaCita.setServiciosSet(ServiciosParaCita);
+
+            // Persistir la cita
             em.persist(NuevaCita);
 
-            // 7. Commit
+            // Actualizar la relación en el usuario
+            usuario.setCita(NuevaCita);
+
+            // 7. Commit - ¡IMPORTANTE!
             ut.commit();
+            transactionCommitted = true;
             System.out.println("=== CITA CLIENTE CREADA EXITOSAMENTE ===");
+            System.out.println("Nueva cita ID: " + NuevaCita.getId());
+
+            // Verificar que la cita se guardó
+            CITA citaVerificada = em.find(CITA.class, NuevaCita.getId());
+            if (citaVerificada != null) {
+                System.out.println("Cita verificada en BD - ID: " + citaVerificada.getId());
+            } else {
+                System.out.println("ERROR: La cita no se encontró después de persistir");
+            }
 
         } catch (Exception e) {
             System.err.println("=== ERROR EN CREAR CITA CLIENTE ===");
@@ -416,19 +644,40 @@ public class Panel_Cliente extends HttpServlet {
         }
 
         // 8. Manejar resultado
-        if (error != null) {
-            // Recargar servicios y mostrar formulario con error
+        if (error != null || !transactionCommitted) {
+            System.out.println("Mostrando formulario con error: " + error);
             try {
-                Query consultaServicios = em.createNativeQuery("SELECT * FROM SERVICIO", SERVICIO.class);
+                // Recargar servicios y mostrar formulario con error
+                TypedQuery<SERVICIO> consultaServicios = em.createQuery("SELECT s FROM SERVICIO s", SERVICIO.class);
                 request.setAttribute("servicios", consultaServicios.getResultList());
-                request.setAttribute("error", error);
-                request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/CLIENTE/formulario_cita_cliente.jsp").forward(request, response);
+                request.setAttribute("error", error != null ? error : "Error desconocido al crear la cita");
+
+                request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/USUARIO/formulario_cita_cliente.jsp").forward(request, response);
             } catch (Exception e) {
                 System.err.println("Error al recargar servicios: " + e.getMessage());
-                response.sendRedirect(request.getContextPath() + "/Perfil/Panel?error=" + java.net.URLEncoder.encode(error, "UTF-8"));
+                response.sendRedirect(request.getContextPath() + "/Perfil/Panel?error=" + java.net.URLEncoder.encode(error != null ? error : "Error desconocido", "UTF-8"));
             }
         } else {
+            System.out.println("Cita creada exitosamente - Redirigiendo al panel");
             response.sendRedirect(request.getContextPath() + "/Perfil/Panel?msg=CitaCreada");
+        }
+    }
+
+    // Método temporal para verificar citas en la base de datos
+    private void verificarCitasEnBD() {
+        try {
+            TypedQuery<CITA> query = em.createQuery("SELECT c FROM CITA c", CITA.class);
+            List<CITA> todasLasCitas = query.getResultList();
+            System.out.println("=== CITAS EN LA BASE DE DATOS ===");
+            for (CITA cita : todasLasCitas) {
+                System.out.println("Cita ID: " + cita.getId()
+                        + ", Fecha: " + cita.getFecha()
+                        + ", Hora: " + cita.getHoraInicio()
+                        + ", Usuario: " + cita.getUsuario().getNombreCompleto());
+            }
+            System.out.println("Total citas: " + todasLasCitas.size());
+        } catch (Exception e) {
+            System.err.println("Error al verificar citas: " + e.getMessage());
         }
     }
 

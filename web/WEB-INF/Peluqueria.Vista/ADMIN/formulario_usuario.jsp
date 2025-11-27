@@ -118,10 +118,7 @@
             </form>
         </div>
 
-        <%-- 
-          ¡NUEVO BLOQUE JAVASCRIPT!
-          (Se pone al final del <body> para que cargue más rápido)
-        --%>
+        
         <script>
             // 1. Seleccionamos el botón y el campo de contraseña
             const toggleButton = document.getElementById('togglePassword');

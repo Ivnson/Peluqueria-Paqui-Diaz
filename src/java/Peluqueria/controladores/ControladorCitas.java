@@ -12,6 +12,7 @@ import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -224,157 +225,177 @@ public class ControladorCitas extends HttpServlet {
 
     }
 
-    
     private void CrearCita(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    String error = null;
+        String error = null;
 
-    try {
-        System.out.println("=== INICIANDO CREACIÓN DE CITA ===");
-        
-        Long UsuarioID = Long.parseLong(request.getParameter("usuarioID"));
-        LocalDate Fecha = LocalDate.parse(request.getParameter("fecha"));
-        LocalTime HoraInicio = LocalTime.parse(request.getParameter("HoraInicio"));
+        try {
+            System.out.println("=== INICIANDO CREACIÓN DE CITA ===");
 
-        System.out.println("Datos recibidos - UsuarioID: " + UsuarioID + ", Fecha: " + Fecha + ", Hora: " + HoraInicio);
+            Long UsuarioID = Long.parseLong(request.getParameter("usuarioID"));
+            LocalDate Fecha = LocalDate.parse(request.getParameter("fecha"));
+            LocalTime HoraInicio = LocalTime.parse(request.getParameter("HoraInicio"));
 
-        // Verificar servicios seleccionados
-        String[] Ids_de_servicios = request.getParameterValues("serviciosIds");
-        if (Ids_de_servicios == null || Ids_de_servicios.length == 0) {
-            error = "Debe seleccionar al menos un servicio.";
-            throw new Exception(error);
-        }
+            System.out.println("Datos recibidos - UsuarioID: " + UsuarioID + ", Fecha: " + Fecha + ", Hora: " + HoraInicio);
 
-        System.out.println("Servicios seleccionados: " + java.util.Arrays.toString(Ids_de_servicios));
+            // Verificar servicios seleccionados
+            String[] Ids_de_servicios = request.getParameterValues("serviciosIds");
+            if (Ids_de_servicios == null || Ids_de_servicios.length == 0) {
+                error = "Debe seleccionar al menos un servicio.";
+                throw new Exception(error);
+            }
 
-        transaccion.begin();
-        System.out.println("Transacción iniciada");
+            System.out.println("Servicios seleccionados: " + java.util.Arrays.toString(Ids_de_servicios));
 
-        USUARIO usuario = em.find(USUARIO.class, UsuarioID);
-        System.out.println("Usuario encontrado: " + (usuario != null ? usuario.getNombreCompleto() : "NULL"));
+            transaccion.begin();
+            System.out.println("Transacción iniciada");
 
-        if (usuario == null) {
-            error = "Usuario no encontrado.";
-            transaccion.rollback();
-            throw new Exception(error);
-        }
+            USUARIO usuario = em.find(USUARIO.class, UsuarioID);
+            System.out.println("Usuario encontrado: " + (usuario != null ? usuario.getNombreCompleto() : "NULL"));
 
-        // Verificar cita existente
-        CITA cita_antigua = usuario.getCita();
-        System.out.println("Cita existente: " + (cita_antigua != null ? "SÍ (ID: " + cita_antigua.getId() + ", Fecha: " + cita_antigua.getFecha() + ")" : "NO"));
-
-        if (cita_antigua != null) {
-            boolean estaExpirada = cita_antigua.getFecha().isBefore(LocalDate.now());
-            System.out.println("Cita expirada: " + estaExpirada);
-            
-            if (estaExpirada) {
-                System.out.println("ARCHIVANDO CITA EXPIRADA...");
-                
-                HISTORIAL_CITA cita_guardada = new HISTORIAL_CITA(
-                    cita_antigua.getFecha(), 
-                    cita_antigua.getHoraInicio(), 
-                    cita_antigua.getUsuario(), 
-                    cita_antigua.getServiciosSet()
-                );
-
-                em.persist(cita_guardada);
-                System.out.println("Cita archivada en historial");
-                
-                em.remove(cita_antigua);
-                System.out.println("Cita antigua eliminada");
-                
-                // IMPORTANTE: Limpiar la referencia en el usuario
-                usuario.setCita(null);
-                em.merge(usuario);
-                System.out.println("Referencia de cita limpiada en usuario");
-            } else {
-                error = "El usuario ya tiene una cita activa para el " + cita_antigua.getFecha();
+            if (usuario == null) {
+                error = "Usuario no encontrado.";
                 transaccion.rollback();
                 throw new Exception(error);
             }
-        }
 
-        // Crear Set de servicios
-        Set<SERVICIO> ServiciosParaCita = new HashSet<>();
-        for (String IdServicio : Ids_de_servicios) {
-            Long id = Long.parseLong(IdServicio);
-            SERVICIO servicio = em.find(SERVICIO.class, id);
-            System.out.println("Buscando servicio ID: " + id + " -> " + (servicio != null ? "ENCONTRADO" : "NO ENCONTRADO"));
-            
-            if (servicio != null) {
-                ServiciosParaCita.add(servicio);
+            // Verificar cita existente
+            CITA cita_antigua = usuario.getCita();
+            System.out.println("Cita existente: " + (cita_antigua != null ? "SÍ (ID: " + cita_antigua.getId() + ", Fecha: " + cita_antigua.getFecha() + ")" : "NO"));
+
+            if (cita_antigua != null) {
+                boolean estaExpirada = cita_antigua.getFecha().isBefore(LocalDate.now());
+                System.out.println("Cita expirada: " + estaExpirada);
+
+                if (estaExpirada) {
+                    System.out.println("ARCHIVANDO CITA EXPIRADA...");
+
+                    HISTORIAL_CITA cita_guardada = new HISTORIAL_CITA(
+                            cita_antigua.getFecha(),
+                            cita_antigua.getHoraInicio(),
+                            cita_antigua.getUsuario(),
+                            cita_antigua.getServiciosSet()
+                    );
+
+                    em.persist(cita_guardada);
+                    System.out.println("Cita archivada en historial");
+
+                    em.remove(cita_antigua);
+                    System.out.println("Cita antigua eliminada");
+
+                    // IMPORTANTE: Limpiar la referencia en el usuario
+                    usuario.setCita(null);
+                    em.merge(usuario);
+                    System.out.println("Referencia de cita limpiada en usuario");
+                } else {
+                    error = "El usuario ya tiene una cita activa para el " + cita_antigua.getFecha();
+                    transaccion.rollback();
+                    throw new Exception(error);
+                }
             }
-        }
 
-        if (ServiciosParaCita.isEmpty()) {
-            error = "No se pudieron encontrar los servicios seleccionados.";
-            transaccion.rollback();
-            throw new Exception(error);
-        }
+            // Crear Set de servicios
+            Set<SERVICIO> ServiciosParaCita = new HashSet<>();
+            for (String IdServicio : Ids_de_servicios) {
+                Long id = Long.parseLong(IdServicio);
+                SERVICIO servicio = em.find(SERVICIO.class, id);
+                System.out.println("Buscando servicio ID: " + id + " -> " + (servicio != null ? "ENCONTRADO" : "NO ENCONTRADO"));
 
-        System.out.println("Servicios para la cita: " + ServiciosParaCita.size());
+                if (servicio != null) {
+                    ServiciosParaCita.add(servicio);
+                }
+            }
 
-        // Crear nueva cita
-        CITA NuevaCita = new CITA(Fecha, HoraInicio, usuario);
-        NuevaCita.setServiciosSet(ServiciosParaCita);
-
-        System.out.println("Persistiendo nueva cita...");
-        em.persist(NuevaCita);
-        
-        // Actualizar la referencia en el usuario
-        usuario.setCita(NuevaCita);
-        em.merge(usuario);
-        
-        System.out.println("Haciendo commit...");
-        transaccion.commit();
-        System.out.println("=== CITA CREADA EXITOSAMENTE ===");
-
-    } catch (Exception e) {
-        System.err.println("=== ERROR EN CREAR CITA ===");
-        System.err.println("Mensaje: " + e.getMessage());
-        System.err.println("Causa: " + e.getCause());
-        e.printStackTrace();
-        
-        if (error == null) {
-            error = "Error al crear la cita: " + e.getMessage();
-        }
-        
-        try {
-            if (transaccion.getStatus() == jakarta.transaction.Status.STATUS_ACTIVE) {
-                System.err.println("Haciendo rollback...");
+            if (ServiciosParaCita.isEmpty()) {
+                error = "No se pudieron encontrar los servicios seleccionados.";
                 transaccion.rollback();
+                throw new Exception(error);
             }
-        } catch (Exception e2) {
-            System.err.println("Error al hacer rollback: " + e2.getMessage());
-        }
-    }
 
-    // Resto del código para manejar el resultado...
-    if (error != null) {
-        System.err.println("Redirigiendo con error: " + error);
-        
-        // Recargar datos para el formulario
-        try {
-            Query consultaClientes = em.createNativeQuery(
-                    "SELECT * FROM USUARIOS WHERE ROL = ?", USUARIO.class);
-            consultaClientes.setParameter(1, "Cliente");
-            request.setAttribute("usuarios", consultaClientes.getResultList());
+            System.out.println("Servicios para la cita: " + ServiciosParaCita.size());
 
-            Query consultaServicios = em.createNativeQuery(
-                    "SELECT * FROM SERVICIO", SERVICIO.class);
-            request.setAttribute("servicios", consultaServicios.getResultList());
+            // PEGA ESTO justo antes de crear la cita en el administrador:
+            System.out.println("=== VERIFICANDO DISPONIBILIDAD (ADMIN) ===");
+            try {
+                TypedQuery<Long> disponibilidadQuery = em.createQuery(
+                        "SELECT COUNT(c) FROM CITA c WHERE c.fecha = :fecha AND c.horaInicio = :horaInicio",
+                        Long.class
+                );
+                disponibilidadQuery.setParameter("fecha", Fecha);
+                disponibilidadQuery.setParameter("horaInicio", HoraInicio);
 
-            request.setAttribute("error", error);
-            request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_cita.jsp").forward(request, response);
+                Long citasExistentes = disponibilidadQuery.getSingleResult();
+                System.out.println("Citas existentes en " + Fecha + " a las " + HoraInicio + ": " + citasExistentes);
+
+                if (citasExistentes > 0) {
+                    error = "Ya existe una cita programada para el " + Fecha + " a las " + HoraInicio
+                            + ". Por favor, selecciona otra fecha u hora.";
+                    throw new Exception(error);
+                }
+            } catch (Exception e) {
+                System.err.println("Error al verificar disponibilidad: " + e.getMessage());
+                throw e;
+            }
+
+            // Crear nueva cita
+            CITA NuevaCita = new CITA(Fecha, HoraInicio, usuario);
+            NuevaCita.setServiciosSet(ServiciosParaCita);
+
+            System.out.println("Persistiendo nueva cita...");
+            em.persist(NuevaCita);
+
+            // Actualizar la referencia en el usuario
+            usuario.setCita(NuevaCita);
+            em.merge(usuario);
+
+            System.out.println("Haciendo commit...");
+            transaccion.commit();
+            System.out.println("=== CITA CREADA EXITOSAMENTE ===");
+
         } catch (Exception e) {
-            System.err.println("Error al recargar datos para formulario: " + e.getMessage());
+            System.err.println("=== ERROR EN CREAR CITA ===");
+            System.err.println("Mensaje: " + e.getMessage());
+            System.err.println("Causa: " + e.getCause());
+            e.printStackTrace();
+
+            if (error == null) {
+                error = "Error al crear la cita: " + e.getMessage();
+            }
+
+            try {
+                if (transaccion.getStatus() == jakarta.transaction.Status.STATUS_ACTIVE) {
+                    System.err.println("Haciendo rollback...");
+                    transaccion.rollback();
+                }
+            } catch (Exception e2) {
+                System.err.println("Error al hacer rollback: " + e2.getMessage());
+            }
+        }
+
+        // Resto del código para manejar el resultado...
+        if (error != null) {
+            System.err.println("Redirigiendo con error: " + error);
+
+            // Recargar datos para el formulario
+            try {
+                Query consultaClientes = em.createNativeQuery(
+                        "SELECT * FROM USUARIOS WHERE ROL = ?", USUARIO.class);
+                consultaClientes.setParameter(1, "Cliente");
+                request.setAttribute("usuarios", consultaClientes.getResultList());
+
+                Query consultaServicios = em.createNativeQuery(
+                        "SELECT * FROM SERVICIO", SERVICIO.class);
+                request.setAttribute("servicios", consultaServicios.getResultList());
+
+                request.setAttribute("error", error);
+                request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_cita.jsp").forward(request, response);
+            } catch (Exception e) {
+                System.err.println("Error al recargar datos para formulario: " + e.getMessage());
+                response.sendRedirect(request.getContextPath() + "/Admin/Citas/Listar");
+            }
+        } else {
             response.sendRedirect(request.getContextPath() + "/Admin/Citas/Listar");
         }
-    } else {
-        response.sendRedirect(request.getContextPath() + "/Admin/Citas/Listar");
     }
-}
-    
-    
 
     private void ActualizarCita(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
