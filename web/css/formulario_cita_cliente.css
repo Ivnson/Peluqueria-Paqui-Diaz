@@ -343,9 +343,13 @@ h2 {
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
+    body {
+        padding: 20px 15px;
+    }
+
     .form-content {
         grid-template-columns: 1fr;
-        gap: 30px;
+        gap: 25px;
         padding: 20px;
     }
 
@@ -355,6 +359,158 @@ h2 {
 
     .form-actions {
         padding: 20px;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Calendario mejorado para tablets */
+    .calendar-container {
+        padding: 15px;
+    }
+
+    .day {
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    .servicios-grid {
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 600px) {
+    .form-container-horizontal {
+        border-radius: 12px;
+    }
+
+    .form-header {
+        padding: 20px;
+    }
+
+    .form-header h1 {
+        font-size: 18px;
+    }
+
+    .form-content {
+        padding: 15px;
+        gap: 20px;
+    }
+
+    h2 {
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 15px 10px;
+    }
+
+    .form-header {
+        padding: 18px 15px;
+    }
+
+    .form-header h1 {
+        font-size: 16px;
+    }
+
+    /* Calendario para móviles */
+    .calendar-container {
+        padding: 12px;
+    }
+
+    .calendar-header {
+        margin-bottom: 12px;
+    }
+
+    .calendar-nav {
+        padding: 3px 8px;
+        font-size: 18px;
+    }
+
+    .calendar-month-year {
+        font-size: 13px;
+    }
+
+    .weekday {
+        font-size: 11px;
+        padding: 6px 0;
+    }
+
+    .day {
+        padding: 6px;
+        font-size: 12px;
+    }
+
+    /* Horarios para móviles */
+    .time-slots {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .time-slot {
+        padding: 10px 6px;
+        font-size: 13px;
+    }
+
+    /* Servicios para móviles */
+    .servicio-checkbox {
+        padding: 12px;
+    }
+
+    .servicio-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .servicio-nombre, .servicio-precio {
+        font-size: 14px;
+    }
+
+    .checkmark {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+    }
+
+    /* Textos informativos */
+    .selected-date-display,
+    .selected-time-display {
+        font-size: 14px;
+    }
+
+    .form-actions {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 360px) {
+    .time-slots {
+        grid-template-columns: 1fr;
+    }
+
+    .servicios-grid {
+        max-height: 250px;
+    }
+
+    .servicio-checkbox {
+        padding: 10px;
+    }
+
+    .calendar-grid {
+        gap: 2px;
+    }
+
+    .day {
+        padding: 4px;
+        font-size: 11px;
     }
 }
 

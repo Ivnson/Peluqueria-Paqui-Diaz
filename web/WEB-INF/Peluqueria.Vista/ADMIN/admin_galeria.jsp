@@ -71,12 +71,12 @@
             /* --- ESTILOS DEL MODAL (VENTANA EMERGENTE) --- */
             .modal {
                 display: none; /* Oculto por defecto */
-                position: fixed; 
+                position: fixed;
                 z-index: 2000; /* Por encima de todo */
                 left: 0;
                 top: 0;
-                width: 100%; 
-                height: 100%; 
+                width: 100%;
+                height: 100%;
                 background-color: rgba(0,0,0,0.9); /* Fondo negro casi opaco */
                 justify-content: center;
                 align-items: center;
@@ -108,10 +108,132 @@
                 color: #ff4444;
                 transform: scale(1.1);
             }
-            
+
             /* Ajuste para el botón de eliminar alineado */
             .acciones-form {
                 margin: 0;
+            }
+
+
+
+            .btn-panel {
+                padding: 10px 18px;
+                background-color: #95a5a6; /* Color gris profesional */
+                color: var(--blanco);
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.2s ease-out;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .btn-panel:hover {
+                background-color: #7f8c8d; /* Gris más oscuro al hover */
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                color: var(--blanco);
+                text-decoration: none;
+            }
+
+            .header-buttons {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+
+
+            /* =========================== */
+            /* MEDIA QUERIES - RESPONSIVE  */
+            /* =========================== */
+
+            @media (max-width: 1024px) {
+                .container {
+                    width: 95%;
+                    margin: 20px auto;
+                    padding: 20px;
+                }
+
+                header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 15px;
+                }
+
+                header h1 {
+                    font-size: 1.5rem;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    width: 98%;
+                    margin: 15px auto;
+                    padding: 15px;
+                }
+
+                /* Hacer la tabla responsive */
+                .table-wrapper {
+                    overflow-x: auto;
+                    border: 1px solid var(--gris-bordes);
+                }
+
+                table {
+                    min-width: 600px; /* Mantiene el ancho mínimo para scroll horizontal */
+                }
+
+                th, td {
+                    padding: 10px 12px;
+                    font-size: 0.9rem;
+                }
+
+                thead th {
+                    font-size: 0.8rem;
+                }
+
+                .btn-crear {
+                    width: 100%;
+                    text-align: center;
+                }
+
+                /* Botones de acción más compactos */
+                .btn-editar, .btn-eliminar {
+                    padding: 5px 8px;
+                    font-size: 12px;
+                    display: block;
+                    margin-bottom: 5px;
+                    text-align: center;
+                }
+            }
+
+            @media (max-width: 480px) {
+                body {
+                    padding: 10px 5px;
+                }
+
+                .container {
+                    padding: 12px;
+                    margin: 10px auto;
+                    border-radius: 8px;
+                }
+
+                header h1 {
+                    font-size: 1.3rem;
+                }
+
+                th, td {
+                    padding: 8px 10px;
+                    font-size: 0.85rem;
+                }
+
+                /* Mensaje de no hay datos */
+                .no-servicios td,
+                .no-usuarios td,
+                .no-citas td {
+                    padding: 30px 20px;
+                    font-size: 0.9rem;
+                }
             }
         </style>
     </head>
@@ -120,11 +242,18 @@
         <div class="container">
             <header>
                 <h1>Gestión de Galería</h1>
+                <div class="header-buttons">
 
-                <%-- Botón para ir al formulario de subir --%>
-                <a href="${pageContext.request.contextPath}/Admin/Galeria/nuevo" class="btn-crear">
-                    + Subir Nueva Foto/Video
-                </a>
+
+                    <a href="${pageContext.request.contextPath}/Admin/Panel" class="btn-panel">
+                        Volver al Panel
+                    </a>
+                    <%-- Botón para ir al formulario de subir --%>
+                    <a href="${pageContext.request.contextPath}/Admin/Galeria/nuevo" class="btn-crear">
+                        Subir Nueva Foto/Video
+                    </a>
+                </div>
+
             </header>
 
             <div class="table-wrapper">
@@ -155,17 +284,17 @@
                             <%-- COLUMNA VISTA PREVIA CON CLICK --%>
                             <td>
                                 <% if ("IMAGEN".equals(item.getTipo())) {%>
-                                    <img src="<%= rutaWeb %>" 
-                                         alt="Ver Imagen" 
-                                         class="thumb-img"
-                                         onclick="abrirModal('<%= rutaWeb %>', 'IMAGEN')"
-                                         title="Clic para ampliar">
-                                <% } else { %>
-                                    <div class="thumb-video"
-                                         onclick="abrirModal('<%= rutaWeb %>', 'VIDEO')"
-                                         title="Clic para reproducir">
-                                        ▶ VIDEO MP4
-                                    </div>
+                                <img src="<%= rutaWeb%>" 
+                                     alt="Ver Imagen" 
+                                     class="thumb-img"
+                                     onclick="abrirModal('<%= rutaWeb%>', 'IMAGEN')"
+                                     title="Clic para ampliar">
+                                <% } else {%>
+                                <div class="thumb-video"
+                                     onclick="abrirModal('<%= rutaWeb%>', 'VIDEO')"
+                                     title="Clic para reproducir">
+                                    ▶ VIDEO MP4
+                                </div>
                                 <% }%>
                             </td>
 
@@ -180,18 +309,18 @@
                             <td>
                                 <form action="${pageContext.request.contextPath}/Admin/Galeria/eliminar" method="POST" class="acciones-form"
                                       onsubmit="return confirm('ATENCIÓN:\n¿Estás seguro de que quieres eliminar este archivo permanentemente?');">
-                                    
+
                                     <input type="hidden" name="id" value="<%= item.getId()%>" />
                                     <%-- Enviamos la ruta para borrar el archivo físico --%>
                                     <input type="hidden" name="nombreArchivo" value="<%= item.getRutaArchivo()%>" />
-                                    
+
                                     <button type="submit" class="btn-eliminar">Eliminar</button>
                                 </form>
                             </td>
                         </tr>
                         <%
-                                }
-                            } else {
+                            }
+                        } else {
                         %>
                         <tr class="no-servicios">
                             <td colspan="5" style="text-align: center; padding: 20px;">
@@ -204,19 +333,16 @@
                     </tbody>
                 </table>
             </div>
-            
-            <%-- Botón volver al panel principal (Opcional) --%>
-            <div style="margin-top: 20px;">
-                <a href="${pageContext.request.contextPath}/Admin/panel_admin.jsp" class="btn-cancel">Volver al Panel</a>
-            </div>
+
+
         </div>
 
         <%-- 5. ESTRUCTURA DEL MODAL (OCULTO AL INICIO) --%>
         <div id="previewModal" class="modal" onclick="cerrarModal()">
             <span class="close-btn" onclick="cerrarModal()">&times;</span>
-            
+
             <img class="modal-content" id="imgModal" style="display:none;">
-            
+
             <video class="modal-content" id="videoModal" controls style="display:none;">
                 <source id="videoSource" src="" type="video/mp4">
                 Tu navegador no soporta la reproducción de videos.
@@ -253,24 +379,24 @@
             function cerrarModal() {
                 var modal = document.getElementById("previewModal");
                 var video = document.getElementById("videoModal");
-                
+
                 modal.style.display = "none";
-                
+
                 // IMPORTANTE: Pausar video al cerrar
                 video.pause();
                 video.currentTime = 0;
             }
 
             // Evitar que el modal se cierre si hacemos clic DENTRO del contenido
-            document.getElementById("imgModal").onclick = function(e) {
+            document.getElementById("imgModal").onclick = function (e) {
                 e.stopPropagation();
             }
-            document.getElementById("videoModal").onclick = function(e) {
+            document.getElementById("videoModal").onclick = function (e) {
                 e.stopPropagation();
             }
-            
+
             // Cerrar con la tecla ESC
-            document.addEventListener('keydown', function(event) {
+            document.addEventListener('keydown', function (event) {
                 if (event.key === "Escape") {
                     cerrarModal();
                 }
@@ -279,3 +405,14 @@
 
     </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+

@@ -41,6 +41,142 @@
                 gap: 12px;
                 align-items: center;
             }
+
+
+            /* =========================== */
+            /* MEDIA QUERIES - RESPONSIVE  */
+            /* =========================== */
+
+            @media (max-width: 1024px) {
+                .container {
+                    width: 95%;
+                    margin: 20px auto;
+                    padding: 20px;
+                }
+
+                header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 15px;
+                }
+
+                .header-buttons {
+                    width: 100%;
+                    justify-content: flex-start;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    width: 98%;
+                    margin: 15px auto;
+                    padding: 15px;
+                }
+
+                header h1 {
+                    font-size: 1.5rem;
+                }
+
+                /* Hacer la tabla responsive */
+                .table-wrapper {
+                    overflow-x: auto;
+                    border: 1px solid var(--gris-bordes);
+                    
+                }
+
+                table {
+                    min-width: 800px; /* Ancho mínimo para scroll horizontal */
+                }
+
+                th, td {
+                    padding: 10px 12px;
+                    font-size: 0.9rem;
+                }
+
+                thead th {
+                    font-size: 0.8rem;
+                    padding: 12px 10px;
+                }
+
+                /* Botones del header */
+                .btn-crear, .btn-panel {
+                    padding: 8px 14px;
+                    font-size: 0.9rem;
+                    min-height: 44px; /* Tamaño táctil */
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                /* Botones de acción en tabla */
+                .btn-editar, .btn-eliminar {
+                    padding: 8px 10px;
+                    font-size: 12px;
+                    display: block;
+                    margin-bottom: 5px;
+                    text-align: center;
+                    min-width: 60px;
+                    min-height: 32px;
+                }
+
+                .acciones-form {
+                    display: block;
+                    margin-bottom: 5px;
+                }
+            }
+
+            
+
+            @media (max-width: 480px) {
+                .container {
+                    padding: 10px;
+                    margin: 5px auto;
+                }
+
+                header h1 {
+                    font-size: 1.2rem;
+                }
+
+                /* Tabla más compacta para móviles */
+                table {
+                    min-width: 750px;
+                }
+
+                th, td {
+                    padding: 6px 8px;
+                    font-size: 0.8rem;
+                }
+
+                thead th {
+                    font-size: 0.75rem;
+                    padding: 10px 8px;
+                }
+
+                /* Ocultar columnas menos importantes en móviles */
+                @media (max-width: 400px) {
+                    table {
+                        min-width: 700px;
+                    }
+
+                    /* Ocultar ID y Fecha de Registro en móviles muy pequeños */
+                    th:nth-child(1), td:nth-child(1), /* ID */
+                        th:nth-child(5), td:nth-child(5) { /* Fecha de Registro */
+                        display: none;
+                    }
+                }
+            }
+
+            @media (max-width: 768px) {
+                .btn-crear, .btn-panel {
+                    min-height: 40px;
+                }
+
+                .btn-editar, .btn-eliminar {
+                    min-height: 32px;
+                }
+            }
         </style>
 
 

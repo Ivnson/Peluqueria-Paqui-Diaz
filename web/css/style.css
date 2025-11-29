@@ -342,48 +342,25 @@ hr {
     display: none;
 }
 
-/* --- 9. AJUSTE DE TAMAÑO Y ESTILO DEL CARRUSEL (REFORZADO) --- */
+/* --- BOTÓN DE PERFIL / LOGIN EN HEADER --- */
 
-/* Usamos #galeria delante para darle más peso que a Bootstrap */
-#galeria #carouselExample {
-    max-width: 1200px !important; /* !important fuerza a ignorar el ancho de Bootstrap */
-    margin: 20px auto !important; /* Fuerza el centrado */
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+.btn-header {
+    display: inline-block;
+    padding: 8px 20px;          /* Espacio interno cómodo */
+    background-color: var(--verde-oscuro); /* Tu verde corporativo #3a9f8a */
+    color: var(--blanco) !important;       /* Texto blanco forzado */
+    border-radius: 20px;        /* Bordes muy redondeados (píldora) */
+    font-weight: 600;           /* Texto en negrita */
+    text-decoration: none;      /* Sin subrayado */
+    transition: all 0.3s ease;  /* Animación suave */
+    border: 2px solid transparent; /* Para evitar saltos al hacer hover */
 }
 
-/* Forzamos el tamaño de la imagen ignorando la clase .w-100 de Bootstrap */
-#galeria #carouselExample .carousel-item img {
-    height: 500px !important;      /* Altura obligatoria */
-    width: 100% !important;        /* Ancho total del contenedor (que mide 800px) */
-    object-fit: cover !important;  /* Recorte obligatorio */
-    object-position: center top;
-}
-
-/* Ajuste del texto (Caption) */
-#galeria .carousel-caption {
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 10px;
-    padding: 10px 20px;
-    bottom: 20px;
-    max-width: 90%;
-    margin: 0 auto;
-    left: 0; 
-    right: 0;
-}
-
-#galeria .carousel-caption h5 {
-    font-family: var(--fuente-titulos);
-    color: var(--color-principal);
-    font-weight: bold;
-    font-size: 1.5em;
-    text-shadow: 1px 1px 2px #000;
-}
-
-/* Ajuste para móviles */
-@media (max-width: 768px) {
-    #galeria #carouselExample .carousel-item img {
-        height: 350px !important; /* Altura menor forzada en móvil */
-    }
+/* Efecto Hover (Al pasar el ratón) */
+.btn-header:hover {
+    background-color: var(--blanco); /* Fondo blanco */
+    color: var(--verde-oscuro) !important; /* Texto verde */
+    border-color: var(--verde-oscuro); /* Borde verde */
+    box-shadow: 0 4px 10px rgba(58, 159, 138, 0.2); /* Sombra suave */
+    transform: translateY(-2px); /* Se levanta un poco */
 }

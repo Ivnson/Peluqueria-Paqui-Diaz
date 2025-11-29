@@ -16,6 +16,77 @@
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/Panel_Cliente.css">
 
+        <style>
+            /* Estilos base para el header */
+            header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem 2rem;
+                background-color: var(--gris-fondo);
+                border-bottom: 1px solid var(--gris-bordes);
+            }
+
+            .header-buttons {
+                display: flex;
+                gap: 1rem;
+            }
+
+            .btn-logout {
+                padding: 0.5rem 1rem;
+                background-color: #dee2e6;
+                color: var(--texto-oscuro);
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: 600;
+                transition: all 0.2s ease-out;
+                white-space: nowrap;
+            }
+
+            .btn-logout:hover {
+                background-color: #7f8c8d;
+            }
+
+            /* Media Queries para Responsive */
+            @media (max-width: 768px) {
+                header {
+                    flex-direction: column;
+                    gap: 1rem;
+                    padding: 1rem;
+                    text-align: center;
+                }
+
+                .header-buttons {
+                    flex-wrap: wrap;
+                    justify-content: center;
+                    gap: 0.75rem;
+                }
+
+                .btn-logout {
+                    padding: 0.5rem 0.8rem;
+                    font-size: 0.9rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                header h1 {
+                    font-size: 1.5rem;
+                }
+
+                .header-buttons {
+                    flex-direction: column;
+                    width: 100%;
+                    gap: 0.5rem;
+                }
+
+                .btn-logout {
+                    width: 100%;
+                    padding: 0.75rem;
+                    text-align: center;
+                }
+            }
+        </style>
+
     </head>
     <body>
 
@@ -44,15 +115,37 @@
             <header>
                 <h1><span>Hola,</span> <%= nombreCliente%>!</h1>
                 <div class="header-buttons">
+
+                    <%
+                        if (usuario.getRol().equals("Administrador")) {
+                    %>
+
+                    <a href="${pageContext.request.contextPath}/Admin/Panel" class="btn-logout">
+                        Panel Admin
+                    </a>
+
                     <a href="${pageContext.request.contextPath}/" class="btn-logout">
                         Ir al Inicio
                     </a>
                     <a href="${pageContext.request.contextPath}/Logout" class="btn-logout">Cerrar Sesión</a>
+
+                    <%
+                    } else {
+                    %>
+
+                    <a href="${pageContext.request.contextPath}/" class="btn-logout">
+                        Ir al Inicio
+                    </a>
+                    <a href="${pageContext.request.contextPath}/Logout" class="btn-logout">Cerrar Sesión</a>
+
+
+                    <%
+                        }
+                    %>
                 </div>
             </header>
 
             <%
-
                 if (citaActiva != null) {
 
             %>

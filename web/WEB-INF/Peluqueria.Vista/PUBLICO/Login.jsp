@@ -9,6 +9,21 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/Login.css">
 
         <title>Iniciar Sesión - Peluquería Paqui Diaz</title>
+
+        <style>
+            .logo {
+                text-align: center;
+                margin-bottom: 30px;
+                padding: 20px 0;
+                
+            }
+
+            .logo img {
+                max-width: 200px;
+                height: auto;
+                border-radius: 220px ; 
+            }
+        </style>
     </head>
     <body>
 
@@ -17,7 +32,9 @@
             <%-- 2. PANEL IZQUIERDO (Branding) --%>
             <div class="left-pane">
                 <div class="logo">
-                    <a href="${pageContext.request.contextPath}/">PD</a>
+                    <a href="${pageContext.request.contextPath}/">
+                        <img src="${pageContext.request.contextPath}/img/logopeluqueria.png" alt="LOGO"/>
+                    </a>
                 </div>
             </div>
 

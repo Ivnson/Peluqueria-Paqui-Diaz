@@ -66,11 +66,170 @@
                 color: var(--blanco);
                 text-decoration: none;
             }
-            
+
             .header-buttons {
                 display: flex;
                 gap: 12px;
                 align-items: center;
+            }
+
+
+            /* =========================== */
+            /* MEDIA QUERIES - RESPONSIVE  */
+            /* =========================== */
+
+            @media (max-width: 1024px) {
+                .container {
+                    width: 95%;
+                    margin: 20px auto;
+                    padding: 20px;
+                }
+
+                header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 15px;
+                }
+
+                .header-buttons {
+                    width: 100%;
+                    justify-content: flex-start;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    width: 98%;
+                    margin: 15px auto;
+                    padding: 15px;
+                }
+
+                header h1 {
+                    font-size: 1.5rem;
+                }
+
+                /* Hacer la tabla responsive */
+                .table-wrapper {
+                    overflow-x: auto;
+                    border: 1px solid var(--gris-bordes);
+                    -webkit-overflow-scrolling: touch; /* Mejor scroll en iOS */
+                }
+
+                table {
+                    min-width: 700px; /* Ancho mínimo para scroll horizontal */
+                }
+
+                th, td {
+                    padding: 10px 12px;
+                    font-size: 0.9rem;
+                }
+
+                thead th {
+                    font-size: 0.8rem;
+                    padding: 12px 10px;
+                }
+
+                /* Botones del header */
+                .btn-crear, .btn-panel {
+                    padding: 8px 14px;
+                    font-size: 0.9rem;
+                }
+
+                /* Botones de acción en tabla */
+                .btn-editar, .btn-eliminar {
+                    padding: 5px 8px;
+                    font-size: 12px;
+                    display: block;
+                    margin-bottom: 5px;
+                    text-align: center;
+                    width: 60px;
+                }
+
+                /* Lista de servicios más compacta */
+                .servicios-list {
+                    padding-left: 15px;
+                    font-size: 0.85rem;
+                }
+
+                .servicios-list li {
+                    margin-bottom: 3px;
+                }
+            }
+
+           
+            
+
+            @media (max-width: 480px) {
+                .container {
+                    padding: 10px;
+                }
+
+                header h1 {
+                    font-size: 1.2rem;
+                    text-align: center;
+                    width: 100%;
+                }
+
+                /* Tabla más compacta para móviles */
+                table {
+                    min-width: 650px;
+                }
+
+                th, td {
+                    padding: 6px 8px;
+                    font-size: 0.8rem;
+                }
+
+                thead th {
+                    font-size: 0.75rem;
+                    padding: 10px 8px;
+                }
+
+                /* Ocultar columnas menos importantes en móviles muy pequeños */
+                @media (max-width: 360px) {
+                    table {
+                        min-width: 600px;
+                    }
+
+                    /* Opcional: ocultar ID de cita en móviles muy pequeños */
+                    th:nth-child(1),
+                        td:nth-child(1) {
+                        display: none;
+                    }
+                }
+            }
+
+            /* Mejoras específicas para la tabla de citas */
+            .servicios-list {
+                max-width: 200px;
+                word-wrap: break-word;
+            }
+
+            /* Para el contenedor de botones en el header */
+            .header-buttons {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+
+            /* Asegurar que los botones sean táctiles en móviles */
+            .btn-crear, .btn-panel, .btn-editar, .btn-eliminar {
+                min-height: 44px; /* Tamaño mínimo táctil recomendado */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            @media (max-width: 768px) {
+                .btn-crear, .btn-panel {
+                    min-height: 40px;
+                }
+
+                .btn-editar, .btn-eliminar {
+                    min-height: 32px;
+                }
             }
         </style>
     </head>
@@ -149,7 +308,7 @@
                                     <li>(Sin servicios)</li>
                                         <%
                                             } // Cierre del 'else' de servicios
-%>
+                                        %>
                                 </ul>
                             </td>
 
@@ -173,7 +332,7 @@
                         </tr>
                         <%
                             } // Cierre del 'else' de citas
-%>
+                        %>
                     </tbody>
                 </table>
             </div> <%-- Fin de .table-wrapper --%>
