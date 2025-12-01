@@ -217,55 +217,56 @@ public class Panel_Cliente extends HttpServlet {
         List<HISTORIAL_CITA> historialCitas = null;
 
         try {
+            // <CHANGE> Cambiado getSingleResult() por getResultList() para manejar múltiples citas
             TypedQuery<CITA> citaQuery = em.createQuery(
-                    "SELECT c FROM CITA c LEFT JOIN FETCH c.serviciosSet WHERE c.usuario.id = :usuarioId", CITA.class);
+                    "SELECT c FROM CITA c LEFT JOIN FETCH c.serviciosSet WHERE c.usuario.id = :usuarioId ORDER BY c.fecha ASC, c.horaInicio ASC", CITA.class);
             citaQuery.setParameter("usuarioId", usuario.getId());
-            citaActiva = citaQuery.getSingleResult();
+            List<CITA> citasUsuario = citaQuery.getResultList();
 
-            // --- ¡LÓGICA CORREGIDA! ---
-            // Combinamos la fecha y la hora de la cita
-            LocalDateTime fechaHoraCita = LocalDateTime.of(citaActiva.getFecha(), citaActiva.getHoraInicio());
+            // Procesar todas las citas del usuario
+            for (CITA cita : citasUsuario) {
+                LocalDateTime fechaHoraCita = LocalDateTime.of(cita.getFecha(), cita.getHoraInicio());
 
-            // Comparamos con la fecha Y hora actuales
-            if (fechaHoraCita.isBefore(LocalDateTime.now())) {
-                // La cita ya pasó (ej. son las 11:27, la cita era a las 11:26)
-                System.out.println("LOG: Cita activa encontrada, pero ya expiró. Moviendo al historial...");
+                if (fechaHoraCita.isBefore(LocalDateTime.now())) {
+                    // La cita ya pasó - mover al historial
+                    System.out.println("LOG: Cita ID " + cita.getId() + " expirada. Moviendo al historial...");
 
-                try {
-                    ut.begin();
-                    // 1. "Guardar": Copiar a HISTORIAL_CITA
-                    HISTORIAL_CITA archivo = new HISTORIAL_CITA(
-                            citaActiva.getFecha(),
-                            citaActiva.getHoraInicio(),
-                            citaActiva.getUsuario(),
-                            new HashSet<>(citaActiva.getServiciosSet())
-                    );
-                    em.persist(archivo);
-
-                    // 2. "Borrar": Eliminar de CITA
-                    em.remove(em.merge(citaActiva)); // Usamos merge() por seguridad
-                    ut.commit();
-
-                    // 3. Ponerla a null para que el JSP muestre "Pedir Cita"
-                    citaActiva = null;
-
-                } catch (Exception e_archivar) {
-                    System.err.println("Error al archivar cita expirada: " + e_archivar.getMessage());
                     try {
-                        ut.rollback();
-                    } catch (Exception e_rb) {
+                        ut.begin();
+                        // 1. Copiar a HISTORIAL_CITA
+                        HISTORIAL_CITA archivo = new HISTORIAL_CITA(
+                                cita.getFecha(),
+                                cita.getHoraInicio(),
+                                cita.getUsuario(),
+                                new HashSet<>(cita.getServiciosSet())
+                        );
+                        em.persist(archivo);
+
+                        // 2. Eliminar de CITA
+                        em.remove(em.merge(cita));
+                        ut.commit();
+
+                    } catch (Exception e_archivar) {
+                        System.err.println("Error al archivar cita expirada: " + e_archivar.getMessage());
+                        try {
+                            ut.rollback();
+                        } catch (Exception e_rb) {
+                        }
+                    }
+                } else {
+                    // <CHANGE> La primera cita futura que encontremos será la "cita activa"
+                    if (citaActiva == null) {
+                        citaActiva = cita;
                     }
                 }
             }
 
-        } catch (NoResultException e) {
-            citaActiva = null; // No tiene cita, es normal
         } catch (Exception e) {
             System.err.println("Error al buscar cita activa: " + e.getMessage());
         }
 
+        // ... existing code ...
         try {
-
             TypedQuery<HISTORIAL_CITA> historialQuery = em.createQuery(
                     "SELECT h FROM HISTORIAL_CITA h LEFT JOIN FETCH h.serviciosSet WHERE h.usuario.id = :usuarioId ORDER BY h.fecha DESC", HISTORIAL_CITA.class);
             historialQuery.setParameter("usuarioId", usuario.getId());
