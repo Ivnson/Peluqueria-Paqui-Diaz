@@ -31,23 +31,20 @@ public class USUARIO implements Serializable {
     private Long id;
 
     @Column(name = "NombreCompleto", nullable = false)
-    private String nombreCompleto;  // <-- Cambio a camelCase
+    private String nombreCompleto;
 
-    //le pongo el UNIQUE despues de hacer pruebas 
     @Column(name = "Email", nullable = false, unique = true)
-    private String email;  // <-- Cambio a camelCase
+    private String email;
 
-    //le pongo el UNIQUE despues de hacer pruebas 
-    @Column(name = "Telefono", nullable = false, length = 12)
-    private Long telefono;  // <-- Cambio a camelCase
+    @Column(name = "Telefono", nullable = false, length = 9, unique = true)
+    private Long telefono;
 
     @Column(name = "FechaRegistro", nullable = false)
-    private LocalDate fechaRegistro;  // <-- Cambio a camelCase
+    private LocalDate fechaRegistro;
 
     @Column(name = "Rol")
-    private String rol;  // <-- Cambio a camelCase
+    private String rol;
 
-    // CORRECCIÓN: mappedBy debe coincidir con el nombre del campo en CITA
     @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private CITA cita;
 
@@ -63,16 +60,16 @@ public class USUARIO implements Serializable {
         this.telefono = Telefono;
         this.fechaRegistro = FechaRegistro;
         this.rol = Rol;
-        this.password = contraseñaHash ; 
+        this.password = contraseñaHash;
     }
-    
+
     public USUARIO(String NombreCompleto, String Email, Long Telefono, LocalDate FechaRegistro, String Rol) {
         this.nombreCompleto = NombreCompleto;
         this.email = Email;
         this.telefono = Telefono;
         this.fechaRegistro = FechaRegistro;
         this.rol = Rol;
-        
+
     }
 
     public String getNombreCompleto() {

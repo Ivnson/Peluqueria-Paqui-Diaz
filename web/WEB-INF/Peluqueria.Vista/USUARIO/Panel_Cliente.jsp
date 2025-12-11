@@ -1,10 +1,13 @@
+<%-- /WEB-INF/Peluqueria.Vista/CLIENTE/Panel_Cliente.jsp --%>
+
+
 <%@ page import="Peluqueria.modelo.USUARIO" %>
 <%@ page import="Peluqueria.modelo.CITA" %>
-<%@ page import="Peluqueria.modelo.HISTORIAL_CITA" %> <%-- ¡Nueva importación! --%>
+<%@ page import="Peluqueria.modelo.HISTORIAL_CITA" %> 
 <%@ page import="Peluqueria.modelo.SERVICIO" %>
-<%@ page import="java.util.List" %> <%-- Para el historial --%>
+<%@ page import="java.util.List" %> 
 <%@ page import="java.util.Set" %>
-<%@ page import="java.time.format.DateTimeFormatter" %> <%-- Para formatear fechas/horas --%>
+<%@ page import="java.time.format.DateTimeFormatter" %> <%-- CLASE PARA PONER LAS FECHAS BONITAS (EJ: 12/10/2023) --%>
 
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -14,10 +17,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Mi Panel - Peluquería Paqui Diaz</title>
 
+        <%-- VINCULAMOS LA HOJA DE ESTILOS CSS --%>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/Panel_Cliente.css">
 
         <style>
-            /* Estilos base para el header */
+            /* ESTILOS INTERNOS PARA LA CABECERA Y BOTONES */
             header {
                 display: flex;
                 justify-content: space-between;
@@ -47,7 +51,7 @@
                 background-color: #7f8c8d;
             }
 
-            /* Media Queries para Responsive */
+            /* MEDIA QUERIES PARA QUE SE VEA BIEN EN MÓVILES */
             @media (max-width: 768px) {
                 header {
                     flex-direction: column;
@@ -91,35 +95,42 @@
     <body>
 
         <%
-            // --- 1. LÓGICA DE JAVA (SCRIPTLET) ---
+            // --- 1. BLOQUE JAVA DE INICIALIZACIÓN ---
 
-            // Obtenemos el usuario de la sesión
+            // RECUPERAMOS AL USUARIO DE LA SESIÓN 
             USUARIO usuario = (USUARIO) session.getAttribute("usuarioLogueado");
 
-            // Obtenemos la cita activa y el historial del request (¡Tu ControladorCliente debe enviar esto!)
+            // RECUPERAMOS LOS DATOS QUE EL SERVLET  NOS HA ENVIADO EN EL REQUEST
+            // 'citaActiva': PUEDE SER NULL SI EL CLIENTE NO TIENE CITA PENDIENTE
+            // 'historialCitas': LISTA DE CITAS PASADAS
             CITA citaActiva = (CITA) request.getAttribute("citaActiva");
             List<HISTORIAL_CITA> historialCitas = (List<HISTORIAL_CITA>) request.getAttribute("historialCitas");
 
-            // Formateadores para fechas y horas
+            // DEFINIMOS EL FORMATO EN EL QUE QUEREMOS MOSTRAR LAS FECHAS Y HORAS
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
+            // LÓGICA PARA OBTENER SOLO EL PRIMER NOMBRE DEL CLIENTE (ESTÉTICA)
             String nombreCliente = "Cliente";
             if (usuario != null) {
-                nombreCliente = usuario.getNombreCompleto().split(" ")[0]; // Solo el primer nombre
+                // SPLIT SEPARA EL NOMBRE COMPLETO POR ESPACIOS Y COGEMOS EL PRIMERO
+                nombreCliente = usuario.getNombreCompleto().split(" ")[0];
             }
         %>
 
         <div class="container">
 
             <header>
+                <%-- IMPRIMIMOS EL NOMBRE DEL CLIENTE --%>
                 <h1><span>Hola,</span> <%= nombreCliente%>!</h1>
                 <div class="header-buttons">
 
                     <%
+                        // SI EL USUARIO ES ADMIN, LE MOSTRAMOS UN BOTÓN EXTRA
                         if (usuario.getRol().equals("Administrador")) {
                     %>
 
+                    <%-- BOTÓN EXCLUSIVO PARA ADMINISTRADORES --%>
                     <a href="${pageContext.request.contextPath}/Admin/Panel" class="btn-logout">
                         Panel Admin
                     </a>
@@ -130,6 +141,7 @@
                     <a href="${pageContext.request.contextPath}/Logout" class="btn-logout">Cerrar Sesión</a>
 
                     <%
+                        // SI ES UN CLIENTE NORMAL
                     } else {
                     %>
 
@@ -146,21 +158,28 @@
             </header>
 
             <%
+                // --- 2. LÓGICA PRINCIPAL DE VISUALIZACIÓN ---
+                // SI 'citaActiva' NO ES NULL, SIGNIFICA QUE HAY UNA CITA PENDIENTE
+                // MOSTRAMOS EL DASHBOARD COMPLETO CON DETALLES
                 if (citaActiva != null) {
 
             %>
 
-            <%-- Tarjetas de Estadísticas (Kudos) --%>
+            <%-- BLOQUE A: SE MUESTRA SOLO SI HAY CITA ACTIVA --%>
             <div class="kpi-grid">
+                <%-- TARJETA 1: FECHA Y HORA --%>
                 <div class="kpi-card">
                     <div class="label">Tu Próxima Cita</div>
                     <div class="value"><%= citaActiva.getFecha().format(dateFormatter)%></div>
                     <div class="detail">Hora: <%= citaActiva.getHoraInicio().format(timeFormatter)%></div>
                 </div>
+
+                <%-- TARJETA 2: TOTAL DE SERVICIOS Y PRECIO CALCULADO --%>
                 <div class="kpi-card">
                     <div class="label">Servicios Reservados</div>
                     <div class="value"><%= citaActiva.getServiciosSet().size()%></div>
                     <%
+                        // BUCLE JAVA PARA SUMAR EL PRECIO DE TODOS LOS SERVICIOS DE LA CITA
                         double totalPrecio = 0;
                         for (SERVICIO s : citaActiva.getServiciosSet()) {
                             totalPrecio += s.getPrecio();
@@ -168,6 +187,8 @@
                     %>
                     <div class="detail">Precio total estimado: <%= String.format("%.2f", totalPrecio)%> €</div>
                 </div>
+
+                <%-- TARJETA 3: ESTADO --%>
                 <div class="kpi-card">
                     <div class="label">Estado</div>
                     <div class="value">Confirmada</div>
@@ -177,11 +198,12 @@
 
             <div class="content-area">
 
-                <%-- Tarjeta 1: Detalle de los Servicios de la Cita --%>
+                <%-- TARJETA DE DETALLES: LISTA DESGLOSADA DE SERVICIOS --%>
                 <div class="content-card">
                     <h2>Detalles de mi Cita</h2>
                     <ul class="servicios-list">
                         <%
+                            // BUCLE PARA IMPRIMIR CADA SERVICIO EN UNA LISTA 
                             Set<SERVICIO> servicios = citaActiva.getServiciosSet();
                             for (SERVICIO s : servicios) {
                         %>
@@ -192,7 +214,7 @@
                     </ul>
                 </div>
 
-                <%-- Tarjeta 2: Acciones y Perfil --%>
+                <%-- TARJETA DE ACCIONES (CANCELAR, EDITAR PERFIL) --%>
                 <div class="content-card">
                     <h2>Acciones</h2>
                     <ul class="acciones-list">
@@ -200,7 +222,8 @@
                             <a href="${pageContext.request.contextPath}/Perfil/Editar">Modificar mis datos</a>
                         </li>
                         <li>
-                            <%-- Formulario para Cancelar Cita --%>
+                            <%-- FORMULARIO PARA CANCELAR LA CITA. 
+                                 SE USA UN FORM Y NO UN ENLACE 'A' PORQUE ES UNA ACCIÓN DESTRUCTIVA (POST) --%>
                             <form action="${pageContext.request.contextPath}/Perfil/Citas/Cancelar" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres cancelar tu cita?');">
                                 <input type="hidden" name="idCita" value="<%= citaActiva.getId()%>" />
                                 <button type="submit" class="btn-cancelar">Cancelar mi cita</button>
@@ -215,22 +238,23 @@
             </div>
 
             <%
+                // --- BLOQUE B: SE MUESTRA SI NO HAY CITA ACTIVA ---
             } else {
-
             %>
 
             <div class="content-area">
 
-                <%-- Tarjeta 1: Pedir Cita --%>
+                <%-- TARJETA DE PEDIR CITA --%>
                 <div class="content-card no-cita-card">
                     <h2 class="h2Cita">No tienes ninguna cita activa</h2>
                     <p>¡Reserva ahora para empezar a cuidar tu look!</p>
+                    <%-- BOTÓN QUE LLEVA AL FORMULARIO DE NUEVA CITA --%>
                     <a href="${pageContext.request.contextPath}/Perfil/Citas/Nueva" class="btn-pedir-cita">
                         Pedir Cita Ahora
                     </a>
                 </div>
 
-                <%-- Tarjeta 2: Perfil y Historial (sin cita activa, más simple) --%>
+                <%-- TARJETA DE ACCIONES  --%>
                 <div class="content-card">
                     <h2>Mi Perfil y Acciones</h2>
                     <ul class="acciones-list">
@@ -245,18 +269,23 @@
 
             </div>
 
-            <%                } // Cierre del if/else citaActiva
+            <%
+                } // FIN DEL IF/ELSE PRINCIPAL
             %>
 
-            <%-- --- 3. SECCIÓN DEL HISTORIAL DE CITAS (Abajo) --- --%>
-            <% if (historialCitas != null && !historialCitas.isEmpty()) { %>
+            <%-- --- 3. SECCIÓN DEL HISTORIAL DE CITAS (SIEMPRE VISIBLE SI HAY DATOS) --- --%>
+            <%
+                // SOLO MOSTRAMOS ESTE BLOQUE SI LA LISTA EXISTE Y TIENE AL MENOS UNA CITA PASADA
+                if (historialCitas != null && !historialCitas.isEmpty()) {
+            %>
             <div class="historial-grid" id="historial">
-                <div class="content-card" style="grid-column: 1 / -1;"> <%-- Ocupa todo el ancho --%>
+                <div class="content-card" style="grid-column: 1 / -1;"> 
                     <h2>Historial de Citas Pasadas</h2>
 
                     <%
+                        // BUCLE PARA RECORRER EL HISTORIAL
                         for (HISTORIAL_CITA hCita : historialCitas) {
-                            // Sumar precios para el detalle
+                            // CALCULAMOS EL PRECIO TOTAL DE CADA CITA DEL HISTORIAL 
                             double historialTotalPrecio = 0;
                             if (hCita.getServiciosSet() != null) {
                                 for (SERVICIO s : hCita.getServiciosSet()) {
@@ -264,6 +293,7 @@
                                 }
                             }
                     %>
+                    <%-- DIBUJAMOS CADA ÍTEM DEL HISTORIAL --%>
                     <div class="historial-item">
                         <div class="historial-icon">📅</div>
                         <div class="historial-details">
@@ -275,13 +305,13 @@
                         </div>
                     </div>
                     <%
-                        } // Fin del for historialCitas
+                        } // FIN DEL BUCLE FOR
                     %>
                 </div>
             </div>
-            <% }%>
+            <% } // FIN DEL IF HISTORIAL %>
 
-        </div> <%-- Fin de .container --%>
+        </div> 
 
     </body>
 </html>

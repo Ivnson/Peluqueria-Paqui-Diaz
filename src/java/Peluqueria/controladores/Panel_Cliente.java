@@ -10,7 +10,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery; // <-- ¡Usamos TypedQuery!
+import jakarta.persistence.TypedQuery;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -37,63 +37,78 @@ public class Panel_Cliente extends HttpServlet {
     @Resource
     private UserTransaction ut;
 
+    // MÉTODO DOGET: MANEJA LAS PETICIONES DE SOLO LECTURA (NAVEGACIÓN)
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // OBTENEMOS LA PARTE DE LA URL DESPUÉS DE "/PERFIL" PARA SABER QUÉ ACCIÓN REALIZAR
         String pathInfo = request.getPathInfo();
+
+        // SI NO HAY RUTA ESPECÍFICA, REDIRIGIMOS AL PANEL PRINCIPAL POR DEFECTO
         if (pathInfo == null || pathInfo.equals("/")) {
-            pathInfo = "/Panel"; // Ruta por defecto
+            pathInfo = "/Panel";
         }
 
         USUARIO usuarioLogueado = (USUARIO) request.getSession().getAttribute("usuarioLogueado");
 
+        // EVALUAMOS LA RUTA SOLICITADA 
         switch (pathInfo) {
             case "/Panel":
+                // MUESTRA LA PÁGINA PRINCIPAL DEL CLIENTE CON SUS CITAS
                 mostrarDashboard(request, response, usuarioLogueado);
                 break;
             case "/Editar":
-                mostrarFormularioEditar(request, response, usuarioLogueado); // <-- Corregido de "Editar"
+                // MUESTRA EL FORMULARIO PARA EDITAR DATOS PERSONALES
+                mostrarFormularioEditar(request, response, usuarioLogueado);
                 break;
 
             case "/Citas/Nueva":
-                // Esto es un GET, debe MOSTRAR el formulario
-                mostrarFormularioCitaCliente(request, response); // <-- Corregido de "CrearCita"
+                // MUESTRA EL FORMULARIO PARA CREAR UNA NUEVA CITA
+                mostrarFormularioCitaCliente(request, response);
                 break;
 
             case "/Citas/Historial":
+                // MUESTRA EL LISTADO DE CITAS PASADAS
                 mostrarHistorial(request, response, usuarioLogueado);
                 break;
 
             case "/HorasOcupadas":
+                // ESTA RUTA ES LLAMADA POR JAVASCRIPT (AJAX) PARA OBTENER HORAS OCUPADAS EN FORMATO JSON
                 obtenerHorasOcupadas(request, response);
                 break;
 
             default:
+                // SI LA RUTA NO EXISTE, DEVUELVE UN ERROR 404
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 break;
         }
     }
 
+    // MÉTODO PARA GENERAR UN JSON CON LAS HORAS DISPONIBLES Y OCUPADAS DE UN DÍA ESPECÍFICO
     private void obtenerHorasOcupadas(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // CONFIGURAMOS LA RESPUESTA COMO JSON
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         try {
+            // RECIBIMOS LA FECHA SELECCIONADA POR EL CLIENTE
             String fechaParam = request.getParameter("fecha");
+
             if (fechaParam == null || fechaParam.isEmpty()) {
+                // SI NO HAY FECHA, DEVUELVE ARRAY VACÍO
                 response.getWriter().write("[]");
                 return;
             }
 
             LocalDate fecha = LocalDate.parse(fechaParam);
 
-            // 1. Generar los huecos posibles
+            // 1. GENERAR TODOS LOS HUECOS POSIBLES SEGÚN EL HORARIO DE APERTURA DEL DÍA
             List<LocalTime> slotsPosibles = generarHorariosParaDia(fecha);
 
-            // 2. Consultar qué horas están ocupadas en la BD
+            // 2. CONSULTAR EN LA BASE DE DATOS QUÉ HORAS YA TIENEN CITA ESE DÍA
             List<String> horasOcupadasStr = new ArrayList<>();
             try {
                 TypedQuery<LocalTime> query = em.createQuery(
@@ -102,6 +117,7 @@ public class Panel_Cliente extends HttpServlet {
 
                 List<LocalTime> resultadosBD = query.getResultList();
 
+                // FORMATEAMOS LAS HORAS DE LA BD A STRING (EJ: "10:30")
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
                 for (LocalTime horaBD : resultadosBD) {
                     horasOcupadasStr.add(horaBD.format(formatter));
@@ -110,7 +126,7 @@ public class Panel_Cliente extends HttpServlet {
                 System.err.println("Error consultando BD: " + e.getMessage());
             }
 
-            // 3. Construir el JSON (Usamos "hora" en singular)
+            // 3. CONSTRUIR MANUALMENTE EL STRING JSON COMBINANDO SLOTS Y ESTADO
             StringBuilder json = new StringBuilder("[");
             DateTimeFormatter jsonFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -118,18 +134,21 @@ public class Panel_Cliente extends HttpServlet {
                 LocalTime slot = slotsPosibles.get(i);
                 String horaSlotStr = slot.format(jsonFormatter);
 
+                // DETERMINAMOS SI EL SLOT ESTÁ EN LA LISTA DE HORAS OCUPADAS
                 boolean estaOcupada = horasOcupadasStr.contains(horaSlotStr);
                 String estado = estaOcupada ? "ocupada" : "libre";
 
-                // CLAVE: Usamos "hora" aquí
+                // AGREGAMOS EL OBJETO JSON AL ARRAY: {"hora": "10:00", "estado": "libre"}
                 json.append(String.format("{\"hora\": \"%s\", \"estado\": \"%s\"}", horaSlotStr, estado));
 
+                // AÑADIMOS COMA SI NO ES EL ÚLTIMO ELEMENTO
                 if (i < slotsPosibles.size() - 1) {
                     json.append(",");
                 }
             }
             json.append("]");
 
+            // ENVIAMOS EL JSON AL NAVEGADOR
             response.getWriter().write(json.toString());
 
         } catch (Exception e) {
@@ -138,8 +157,7 @@ public class Panel_Cliente extends HttpServlet {
         }
     }
 
-    // --- MÉTODO NUEVO CON TUS REGLAS DE NEGOCIO ---
-    // --- MÉTODO AUXILIAR: Define los horarios de apertura ---
+    // MÉTODO AUXILIAR QUE DEFINE LA LÓGICA DE NEGOCIO DE LOS HORARIOS DE APERTURA
     private List<LocalTime> generarHorariosParaDia(LocalDate fecha) {
         List<LocalTime> slots = new ArrayList<>();
         java.time.DayOfWeek diaSemana = fecha.getDayOfWeek();
@@ -147,41 +165,43 @@ public class Panel_Cliente extends HttpServlet {
         LocalTime inicio = null;
         LocalTime fin = null;
 
+        // DEFINIMOS HORARIO DE APERTURA Y CIERRE SEGÚN EL DÍA DE LA SEMANA
         switch (diaSemana) {
-            case MONDAY: // ¡Lunes Cerrado!
-            case SUNDAY: // ¡Domingo Cerrado!
-                return slots; // Devolvemos lista vacía = No hay huecos
+            case MONDAY:
+            case SUNDAY:
+                return slots; // LUNES Y DOMINGO CERRADO (LISTA VACÍA)
 
-            case TUESDAY:   // Martes: 10:00 - 20:00
-            case THURSDAY:  // Jueves: 10:00 - 20:00
-            case FRIDAY:    // Viernes: 10:00 - 20:00
-                inicio = LocalTime.of(10, 0);
+            case TUESDAY:
+            case THURSDAY:
+            case FRIDAY:
+                inicio = LocalTime.of(10, 0); // DE 10:00 A 20:00
                 fin = LocalTime.of(20, 0);
                 break;
 
-            case WEDNESDAY: // Miércoles: 10:00 - 15:00
+            case WEDNESDAY: // MIÉRCOLES HASTA LAS 15:00
                 inicio = LocalTime.of(10, 0);
                 fin = LocalTime.of(15, 0);
                 break;
 
-            case SATURDAY:  // Sábado: 09:00 - 14:00
+            case SATURDAY:  // SÁBADOS DE 09:00 A 14:00
                 inicio = LocalTime.of(9, 0);
                 fin = LocalTime.of(14, 0);
                 break;
         }
 
-        // Generamos los huecos cada 30 minutos
+        // SI HAY HORARIO DEFINIDO, CREAMOS HUECOS CADA 30 MINUTOS
         if (inicio != null && fin != null) {
             LocalTime actual = inicio;
             while (actual.isBefore(fin)) {
                 slots.add(actual);
-                actual = actual.plusMinutes(30);
+                actual = actual.plusMinutes(30);// INCREMENTO DE 30 MINUTOS
             }
         }
 
         return slots;
     }
 
+    // MÉTODO DOPOST: MANEJA EL ENVÍO DE FORMULARIOS Y ACCIONES QUE MODIFICAN DATOS
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -192,16 +212,20 @@ public class Panel_Cliente extends HttpServlet {
 
         USUARIO usuarioLogueado = (USUARIO) request.getSession().getAttribute("usuarioLogueado");
 
+        // ROUTER PARA PETICIONES POST
         switch (pathInfo) {
             case "/Citas/Cancelar":
+                // LÓGICA PARA CANCELAR UNA CITA EXISTENTE
                 cancelarCita(request, response, usuarioLogueado);
                 break;
 
             case "/Citas/Crear":
+                // LÓGICA PARA REGISTRAR UNA NUEVA CITA
                 crearCitaCliente(request, response, usuarioLogueado);
                 break;
 
             case "/Actualizar":
+                // LÓGICA PARA ACTUALIZAR DATOS DEL PERFIL
                 actualizarPerfilCliente(request, response, usuarioLogueado);
                 break;
             default:
@@ -210,6 +234,7 @@ public class Panel_Cliente extends HttpServlet {
         }
     }
 
+    // MUESTRA EL DASHBOARD PRINCIPAL Y GESTIONA EL ARCHIVADO DE CITAS PASADAS
     private void mostrarDashboard(HttpServletRequest request, HttpServletResponse response, USUARIO usuario)
             throws ServletException, IOException {
 
@@ -217,36 +242,40 @@ public class Panel_Cliente extends HttpServlet {
         List<HISTORIAL_CITA> historialCitas = null;
 
         try {
-            // <CHANGE> Cambiado getSingleResult() por getResultList() para manejar múltiples citas
+            // BUSCAMOS TODAS LAS CITAS ACTIVAS DEL USUARIO ORDENADAS POR FECHA
             TypedQuery<CITA> citaQuery = em.createQuery(
                     "SELECT c FROM CITA c LEFT JOIN FETCH c.serviciosSet WHERE c.usuario.id = :usuarioId ORDER BY c.fecha ASC, c.horaInicio ASC", CITA.class);
             citaQuery.setParameter("usuarioId", usuario.getId());
             List<CITA> citasUsuario = citaQuery.getResultList();
 
-            // Procesar todas las citas del usuario
+            // RECORREMOS LAS CITAS PARA VERIFICAR SI ALGUNA YA HA PASADO (EXPIRADO)
             for (CITA cita : citasUsuario) {
                 LocalDateTime fechaHoraCita = LocalDateTime.of(cita.getFecha(), cita.getHoraInicio());
 
+                // SI LA FECHA DE LA CITA ES ANTERIOR A "AHORA MISMO"
                 if (fechaHoraCita.isBefore(LocalDateTime.now())) {
-                    // La cita ya pasó - mover al historial
+
                     System.out.println("LOG: Cita ID " + cita.getId() + " expirada. Moviendo al historial...");
 
                     try {
+                        // INICIAMOS TRANSACCIÓN PARA MOVER LA CITA A LA TABLA HISTORIAL
                         ut.begin();
-                        // 1. Copiar a HISTORIAL_CITA
+
+                        // 1. CREAR OBJETO HISTORIAL_CITA CON LOS DATOS DE LA CITA
                         HISTORIAL_CITA archivo = new HISTORIAL_CITA(
                                 cita.getFecha(),
                                 cita.getHoraInicio(),
                                 cita.getUsuario(),
-                                new HashSet<>(cita.getServiciosSet())
+                                new HashSet<>(cita.getServiciosSet()) // COPIAMOS LOS SERVICIOS
                         );
-                        em.persist(archivo);
+                        em.persist(archivo);// GUARDAMOS EN HISTORIAL
 
-                        // 2. Eliminar de CITA
+                        // 2. ELIMINAR DE LA TABLA DE CITAS ACTIVAS
                         em.remove(em.merge(cita));
-                        ut.commit();
+                        ut.commit();// CONFIRMAMOS CAMBIOS
 
                     } catch (Exception e_archivar) {
+                        // SI FALLA, HACEMOS ROLLBACK PARA NO DEJAR DATOS INCONSISTENTES
                         System.err.println("Error al archivar cita expirada: " + e_archivar.getMessage());
                         try {
                             ut.rollback();
@@ -254,7 +283,7 @@ public class Panel_Cliente extends HttpServlet {
                         }
                     }
                 } else {
-                    // <CHANGE> La primera cita futura que encontremos será la "cita activa"
+                    // SI LA CITA ES FUTURA, LA CONSIDERAMOS LA "CITA ACTIVA" (SOLO MOSTRAMOS LA PRÓXIMA)
                     if (citaActiva == null) {
                         citaActiva = cita;
                     }
@@ -265,7 +294,7 @@ public class Panel_Cliente extends HttpServlet {
             System.err.println("Error al buscar cita activa: " + e.getMessage());
         }
 
-        // ... existing code ...
+        // CARGAMOS EL HISTORIAL DE CITAS PASADAS PARA MOSTRARLO
         try {
             TypedQuery<HISTORIAL_CITA> historialQuery = em.createQuery(
                     "SELECT h FROM HISTORIAL_CITA h LEFT JOIN FETCH h.serviciosSet WHERE h.usuario.id = :usuarioId ORDER BY h.fecha DESC", HISTORIAL_CITA.class);
@@ -275,11 +304,13 @@ public class Panel_Cliente extends HttpServlet {
             System.err.println("Error al buscar historial de citas: " + e.getMessage());
         }
 
+        // ENVIAMOS LOS DATOS A LA VISTA JSP
         request.setAttribute("citaActiva", citaActiva);
         request.setAttribute("historialCitas", historialCitas);
         request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/USUARIO/Panel_Cliente.jsp").forward(request, response);
     }
 
+    // PREPARA Y MUESTRA EL FORMULARIO DE EDICIÓN DE PERFIL
     private void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response, USUARIO usuario)
             throws ServletException, IOException {
 
@@ -287,12 +318,14 @@ public class Panel_Cliente extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/USUARIO/perfil_Cliente.jsp").forward(request, response);
     }
 
+    // PREPARA Y MUESTRA EL FORMULARIO PARA PEDIR CITA (CARGA SERVICIOS Y HORAS)
     private void mostrarFormularioCitaCliente(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            // CARGAMOS TODOS LOS SERVICIOS DISPONIBLES EN LA PELUQUERÍA
             TypedQuery<SERVICIO> consultaServicios = em.createQuery("SELECT s FROM SERVICIO s", SERVICIO.class);
             request.setAttribute("servicios", consultaServicios.getResultList());
 
-            // CORREGIDO: Usar el nuevo nombre del método
+            // POR DEFECTO, CARGAMOS LAS HORAS OCUPADAS DE "HOY" PARA LA VISTA INICIAL
             LocalDate hoy = LocalDate.now();
             List<String> horasOcupadas = obtenerHorasOcupadasParaFecha(hoy);
             request.setAttribute("horasOcupadas", horasOcupadas);
@@ -305,7 +338,7 @@ public class Panel_Cliente extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/USUARIO/formulario_cita_cliente.jsp").forward(request, response);
     }
 
-    // En Panel_Cliente.java - REEMPLAZA el método obtenerHorasOcupadas(LocalDate) por este:
+    // MÉTODO AUXILIAR PARA OBTENER HORAS OCUPADAS EN FORMATO LISTA DE STRINGS
     private List<String> obtenerHorasOcupadasParaFecha(LocalDate fecha) {
         try {
             TypedQuery<LocalTime> query = em.createQuery(
@@ -326,10 +359,13 @@ public class Panel_Cliente extends HttpServlet {
         }
     }
 
+    // MUESTRA LA VISTA DEDICADA AL HISTORIAL COMPLETO
     private void mostrarHistorial(HttpServletRequest request, HttpServletResponse response, USUARIO usuario)
             throws ServletException, IOException {
 
         try {
+
+            // CONSULTA JPQL PARA OBTENER EL HISTORIAL ORDENADO POR FECHA DESCENDENTE
             TypedQuery<HISTORIAL_CITA> historialQuery = em.createQuery(
                     "SELECT h FROM HISTORIAL_CITA h LEFT JOIN FETCH h.serviciosSet WHERE h.usuario.id = :usuarioId ORDER BY h.fecha DESC", HISTORIAL_CITA.class);
             historialQuery.setParameter("usuarioId", usuario.getId());
@@ -340,7 +376,7 @@ public class Panel_Cliente extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/USUARIO/Historial_citas.jsp").forward(request, response);
     }
 
-    // --- MÉTODOS POST ---
+    // ACCIÓN PARA CANCELAR UNA CITA
     private void cancelarCita(HttpServletRequest request, HttpServletResponse response, USUARIO usuario)
             throws ServletException, IOException {
 
@@ -350,17 +386,24 @@ public class Panel_Cliente extends HttpServlet {
         String msg = null;
 
         try {
+            // INICIAMOS TRANSACCIÓN PARA BORRAR
             ut.begin();
+            // BUSCAMOS LA CITA POR ID
             CITA citaACancelar = em.find(CITA.class, idCita);
 
-            if (citaACancelar == null || !citaACancelar.getUsuario().getId().equals(usuario.getId())) {
+            USUARIO user = citaACancelar.getUsuario();
+
+            // VERIFICAMOS QUE LA CITA EXISTA Y QUE PERTENEZCA AL USUARIO LOGUEADO 
+            if (citaACancelar == null || !user.getId().equals(usuario.getId())) {
                 error = "No se encontró la cita o no tienes permiso.";
             } else {
+                // SI TODO ES CORRECTO, LA ELIMINAMOS
                 em.remove(citaACancelar);
-                ut.commit();
+                ut.commit(); // CONFIRMAMOS EL BORRADO EN LA BD
                 msg = "Tu cita ha sido cancelada con éxito.";
             }
         } catch (Exception e) {
+            // SI FALLA, HACEMOS ROLLBACK Y CAPTURAMOS EL ERROR
             error = "Error al cancelar la cita: " + e.getMessage();
             try {
                 ut.rollback();
@@ -368,6 +411,7 @@ public class Panel_Cliente extends HttpServlet {
             }
         }
 
+        // GUARDAMOS MENSAJES EN SESIÓN PARA MOSTRARLOS TRAS LA REDIRECCIÓN
         if (error != null) {
             request.getSession().setAttribute("errorMsg", error);
         }
@@ -375,31 +419,41 @@ public class Panel_Cliente extends HttpServlet {
             request.getSession().setAttribute("successMsg", msg);
         }
 
+        // REDIRIGIMOS AL PANEL
         response.sendRedirect(request.getContextPath() + "/Perfil/Panel");
     }
 
+    // ACCIÓN PARA ACTUALIZAR DATOS DEL PERFIL
     private void actualizarPerfilCliente(HttpServletRequest request, HttpServletResponse response, USUARIO usuarioLogueado)
             throws ServletException, IOException {
 
         String error = null;
 
         try {
+            // RECOGEMOS DATOS DEL FORMULARIO
             String nombre = request.getParameter("NombreCompleto");
             String email = request.getParameter("Email");
             Long telefono = Long.parseLong(request.getParameter("Telefono"));
             String passwordPlana = request.getParameter("password");
 
             ut.begin();
+            // BUSCAMOS AL USUARIO EN LA BD PARA ASEGURARNOS QUE ESTÁ
             USUARIO usuario = em.find(USUARIO.class, usuarioLogueado.getId());
+
+            // ACTUALIZAMOS LOS CAMPOS
             usuario.setNombreCompleto(nombre);
             usuario.setEmail(email);
             usuario.setTelefono(telefono);
 
+            // SOLO ACTUALIZAMOS LA CONTRASEÑA SI EL CAMPO NO ESTÁ VACÍO
             if (passwordPlana != null && !passwordPlana.isEmpty()) {
+                // HASHEAMOS LA NUEVA CONTRASEÑA ANTES DE GUARDARLA
                 String hash = Contraseñas.hashPassword(passwordPlana);
                 usuario.setPassword(hash);
             }
             ut.commit();
+
+            // ACTUALIZAMOS EL USUARIO EN LA SESIÓN PARA QUE LOS CAMBIOS SE REFLEJEN INMEDIATAMENTE
             request.getSession().setAttribute("usuarioLogueado", usuario); // ¡Importante!
         } catch (Exception e) {
             error = "Error al actualizar el perfil: " + e.getMessage();
@@ -418,6 +472,7 @@ public class Panel_Cliente extends HttpServlet {
         }
     }
 
+    // LÓGICA PRINCIPAL: CREACIÓN DE UNA CITA NUEVA
     private void crearCitaCliente(HttpServletRequest request, HttpServletResponse response, USUARIO usuarioLogueado)
             throws ServletException, IOException {
 
@@ -427,22 +482,21 @@ public class Panel_Cliente extends HttpServlet {
         try {
             System.out.println("=== INICIANDO CREACIÓN DE CITA CLIENTE ===");
 
-            // DEBUG: Mostrar todos los parámetros recibidos
-            System.out.println("=== PARÁMETROS RECIBIDOS ===");
+            /*System.out.println("=== PARÁMETROS RECIBIDOS ===");
             java.util.Enumeration<String> paramNames = request.getParameterNames();
             while (paramNames.hasMoreElements()) {
                 String paramName = paramNames.nextElement();
                 String[] paramValues = request.getParameterValues(paramName);
                 System.out.println(paramName + ": " + java.util.Arrays.toString(paramValues));
             }
-            System.out.println("=== FIN PARÁMETROS ===");
-
-            // 1. Recoger y validar parámetros
+            System.out.println("=== FIN PARÁMETROS ===");*/
+            // 1. RECOGER Y VALIDAR PARÁMETROS BÁSICOS
             LocalDate Fecha = null;
             LocalTime HoraInicio = null;
             String[] Ids_de_servicios = null;
 
             try {
+                // VALIDACIÓN DE LA FECHA
                 String fechaParam = request.getParameter("fecha");
                 System.out.println("Fecha recibida: '" + fechaParam + "'");
 
@@ -453,7 +507,7 @@ public class Panel_Cliente extends HttpServlet {
 
                 Fecha = LocalDate.parse(fechaParam);
 
-                // Validar que la fecha no sea pasada
+                // VALIDAR QUE LA FECHA NO SEA PASADA
                 if (Fecha.isBefore(LocalDate.now())) {
                     error = "No se pueden agendar citas en fechas pasadas";
                     throw new Exception(error);
@@ -467,6 +521,7 @@ public class Panel_Cliente extends HttpServlet {
             }
 
             try {
+                // VALIDACIÓN DE LA HORA
                 String horaParam = request.getParameter("horaInicio");
                 System.out.println("Hora recibida: '" + horaParam + "'");
 
@@ -477,21 +532,15 @@ public class Panel_Cliente extends HttpServlet {
 
                 HoraInicio = LocalTime.parse(horaParam);
 
-                // Obtener horas laborales del día seleccionado
+                // VERIFICAR QUE LA HORA ESTÁ DENTRO DEL HORARIO DE APERTURA DE ESE DÍA
                 List<LocalTime> horasDia = generarHorariosParaDia(Fecha);
 
-                // Validar que la hora esté dentro del horario generado
+                // VALIDAR QUE LA HORA ESTE DENTRO DEL HORARIO ESTABLECIDO
                 if (!horasDia.contains(HoraInicio)) {
                     error = "La hora seleccionada no es válida para el horario del día.";
                     throw new Exception(error);
                 }
 
-                // Validar horario laboral (9:00 - 13:00)
-                /*if (HoraInicio.isBefore(LocalTime.of(10, 0))
-                        || HoraInicio.isAfter(LocalTime.of(13, 0))) {
-                    error = "El horario debe estar entre 09:00 y 13:00";
-                    throw new Exception(error);
-                }*/
             } catch (Exception e) {
                 if (error == null) {
                     error = "Hora no válida. Formato esperado: HH:MM";
@@ -499,6 +548,7 @@ public class Panel_Cliente extends HttpServlet {
                 throw new Exception(error);
             }
 
+            // RECOGER SERVICIOS SELECCIONADOS (CHECKBOXES)
             Ids_de_servicios = request.getParameterValues("serviciosIds");
             System.out.println("Servicios recibidos: " + (Ids_de_servicios != null ? java.util.Arrays.toString(Ids_de_servicios) : "NULL"));
 
@@ -508,7 +558,7 @@ public class Panel_Cliente extends HttpServlet {
             }
 
             // --- NUEVA VALIDACIÓN DE DISPONIBILIDAD ---
-            // 1. Consultar si ya existe una cita en esa fecha y hora
+            // CONSULTAMOS SI YA EXISTE ALGUIEN CON ESA FECHA Y HORA EXACTA
             TypedQuery<Long> checkQuery = em.createQuery(
                     "SELECT COUNT(c) FROM CITA c WHERE c.fecha = :fecha AND c.horaInicio = :hora", Long.class);
             checkQuery.setParameter("fecha", Fecha);
@@ -517,16 +567,16 @@ public class Panel_Cliente extends HttpServlet {
             Long count = checkQuery.getSingleResult();
 
             if (count > 0) {
-                // ¡Ya existe! Lanzamos nuestro propio error controlado
+                // YA EXISTE --> LANZAMOS ERROR 
                 throw new Exception("Lo sentimos, la hora " + HoraInicio + " del día " + Fecha + " ya está ocupada. Por favor, elige otra.");
             }
             // ------------------------------------------
 
-            // 2. Iniciar transacción
+            // 2. INICIAR TRANSACCIÓN (TODO LO QUE SIGUE SE HACE DE FORMA ATÓMICA)
             ut.begin();
             System.out.println("Transacción iniciada");
 
-            // 3. Refrescar usuario desde BD (IMPORTANTE: dentro de la transacción)
+            // 3. REFRESCAR USUARIO DESDE BD
             USUARIO usuario = em.find(USUARIO.class, usuarioLogueado.getId());
             if (usuario == null) {
                 error = "Usuario no encontrado en la base de datos";
@@ -534,10 +584,10 @@ public class Panel_Cliente extends HttpServlet {
             }
             System.out.println("Usuario cargado: " + usuario.getNombreCompleto());
 
-            // 4. Verificar cita existente del usuario (para evitar múltiples citas)
+            // 4. VERIFICAR SI EL USUARIO YA TIENE UNA CITA ACTIVA (REGLA DE NEGOCIO: SOLO 1 CITA A LA VEZ)
             CITA cita_antigua = null;
             try {
-                // Consulta más específica para evitar problemas de caché
+
                 TypedQuery<CITA> query = em.createQuery(
                         "SELECT c FROM CITA c WHERE c.usuario.id = :usuarioId", CITA.class);
                 query.setParameter("usuarioId", usuario.getId());
@@ -548,14 +598,16 @@ public class Panel_Cliente extends HttpServlet {
 
             System.out.println("Cita existente del usuario: " + (cita_antigua != null ? "SÍ (ID: " + cita_antigua.getId() + ")" : "NO"));
 
+            // SI TIENE CITA, VEMOS SI ES VIEJA (EXPIRADA) O FUTURA
             if (cita_antigua != null) {
+
                 LocalDateTime fechaHoraCitaAntigua = LocalDateTime.of(cita_antigua.getFecha(), cita_antigua.getHoraInicio());
                 boolean estaExpirada = fechaHoraCitaAntigua.isBefore(LocalDateTime.now());
 
                 System.out.println("Cita expirada: " + estaExpirada);
 
                 if (estaExpirada) {
-                    // Cita expirada, archivarla
+                    // SI ES VIEJA, LA MOVEMOS AL HISTORIAL AUTOMÁTICAMENTE PARA DEJAR SITIO A LA NUEVA
                     System.out.println("Archivando cita expirada...");
                     HISTORIAL_CITA archivo = new HISTORIAL_CITA(
                             cita_antigua.getFecha(),
@@ -564,23 +616,23 @@ public class Panel_Cliente extends HttpServlet {
                             new HashSet<>(cita_antigua.getServiciosSet())
                     );
                     em.persist(archivo);
-                    em.remove(em.merge(cita_antigua));
+                    em.remove(em.merge(cita_antigua));// BORRAMOS LA VIEJA
                     System.out.println("Cita antigua archivada y eliminada");
                 } else {
-                    // Cita activa, lanzar error
+                    // SI TIENE UNA CITA FUTURA, IMPEDIMOS CREAR OTRA
                     error = "Ya tienes una cita activa para el " + cita_antigua.getFecha() + " a las " + cita_antigua.getHoraInicio();
                     throw new Exception(error);
                 }
             }
 
-            // 5. Crear Set de servicios (asegurarse de que están managed)
+            // 5. RECUPERAR LOS OBJETOS SERVICIO DE LA BD BASADO EN LOS IDS SELECCIONADOS
             Set<SERVICIO> ServiciosParaCita = new HashSet<>();
             for (String idServicio : Ids_de_servicios) {
                 try {
                     Long id = Long.parseLong(idServicio);
                     SERVICIO servicio = em.find(SERVICIO.class, id);
                     if (servicio != null) {
-                        // Asegurarse de que el servicio esté managed
+
                         SERVICIO managedServicio = em.merge(servicio);
                         ServiciosParaCita.add(managedServicio);
                         System.out.println("Servicio añadido: " + managedServicio.getNombreServicio());
@@ -597,26 +649,24 @@ public class Panel_Cliente extends HttpServlet {
                 throw new Exception(error);
             }
 
-            // 6. Crear nueva cita
+            // 6. CREAR Y GUARDAR LA NUEVA CITA
             System.out.println("Creando nueva cita...");
             CITA NuevaCita = new CITA(Fecha, HoraInicio, usuario);
 
-            // Establecer la relación bidireccional
+            // ASIGNAMOS LOS SERVICIOS
             NuevaCita.setServiciosSet(ServiciosParaCita);
 
-            // Persistir la cita
-            em.persist(NuevaCita);
+            em.persist(NuevaCita); // GUARDAMOS EN BD
 
-            // Actualizar la relación en el usuario
-            usuario.setCita(NuevaCita);
+            usuario.setCita(NuevaCita); // ACTUALIZAMOS LA RELACIÓN EN EL USUARIO
 
-            // 7. Commit - ¡IMPORTANTE!
+            // 7. CONFIRMAR TRANSACCIÓN
             ut.commit();
             transactionCommitted = true;
             System.out.println("=== CITA CLIENTE CREADA EXITOSAMENTE ===");
             System.out.println("Nueva cita ID: " + NuevaCita.getId());
 
-            // Verificar que la cita se guardó
+            //VERIFICAR QUE LA CITA SE GUARDO
             CITA citaVerificada = em.find(CITA.class, NuevaCita.getId());
             if (citaVerificada != null) {
                 System.out.println("Cita verificada en BD - ID: " + citaVerificada.getId());
@@ -625,6 +675,7 @@ public class Panel_Cliente extends HttpServlet {
             }
 
         } catch (Exception e) {
+            // MANEJO DE ERRORES Y ROLLBACK
             System.err.println("=== ERROR EN CREAR CITA CLIENTE ===");
             System.err.println("Mensaje: " + e.getMessage());
             System.err.println("Causa: " + e.getCause());
@@ -644,11 +695,11 @@ public class Panel_Cliente extends HttpServlet {
             }
         }
 
-        // 8. Manejar resultado
+        // 8. REDIRECCIÓN O VUELTA AL FORMULARIO
         if (error != null || !transactionCommitted) {
             System.out.println("Mostrando formulario con error: " + error);
             try {
-                // Recargar servicios y mostrar formulario con error
+                //RECARGAR SERVICIOS Y MOSTRAR EL FORMULARIO CON UN ERROR
                 TypedQuery<SERVICIO> consultaServicios = em.createQuery("SELECT s FROM SERVICIO s", SERVICIO.class);
                 request.setAttribute("servicios", consultaServicios.getResultList());
                 request.setAttribute("error", error != null ? error : "Error desconocido al crear la cita");
@@ -664,22 +715,5 @@ public class Panel_Cliente extends HttpServlet {
         }
     }
 
-    // Método temporal para verificar citas en la base de datos
-    private void verificarCitasEnBD() {
-        try {
-            TypedQuery<CITA> query = em.createQuery("SELECT c FROM CITA c", CITA.class);
-            List<CITA> todasLasCitas = query.getResultList();
-            System.out.println("=== CITAS EN LA BASE DE DATOS ===");
-            for (CITA cita : todasLasCitas) {
-                System.out.println("Cita ID: " + cita.getId()
-                        + ", Fecha: " + cita.getFecha()
-                        + ", Hora: " + cita.getHoraInicio()
-                        + ", Usuario: " + cita.getUsuario().getNombreCompleto());
-            }
-            System.out.println("Total citas: " + todasLasCitas.size());
-        } catch (Exception e) {
-            System.err.println("Error al verificar citas: " + e.getMessage());
-        }
-    }
-
+    
 }

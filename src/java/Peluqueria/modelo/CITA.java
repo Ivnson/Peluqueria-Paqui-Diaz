@@ -47,16 +47,16 @@ public class CITA implements Serializable {
     private Long id;
 
     @Column(name = "Fecha", nullable = false)
-    private LocalDate fecha;  // <-- Cambio a camelCase
+    private LocalDate fecha;  
 
     @Column(name = "HoraInicio", nullable = false)
-    private LocalTime horaInicio;  // <-- Cambio a camelCase
+    private LocalTime horaInicio; 
 
     //RELACION 1---1 (UNA CITA PERTENECE SOLO A UN USUARIO Y UN USUARIO SOLO TIENE UNA CITA
-    // CORRECCIÓN: Nombre del campo en minúscula para seguir convención Java
+    
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false, unique = true)
-    private USUARIO usuario;  // <-- Cambio a camelCase
+    private USUARIO usuario;  
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(

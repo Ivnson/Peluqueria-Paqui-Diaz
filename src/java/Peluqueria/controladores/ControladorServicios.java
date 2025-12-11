@@ -34,64 +34,43 @@ public class ControladorServicios extends HttpServlet {
     @Resource
     private UserTransaction transaccion; //GESTIONAR TRANSACCIONES
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // OBTENEMOS LA PARTE FINAL DE LA URL PARA SABER QUÉ QUIERE HACER EL ADMIN
         String pathInfo = request.getPathInfo();
 
+        // SI NO HAY RUTA ESPECÍFICA, POR DEFECTO MOSTRAMOS LA LISTA
         if (pathInfo == null || pathInfo.equals("/")) {
             pathInfo = "/Listar";
         }
 
         switch (pathInfo) {
             case "/Listar": {
-
+                // LLAMA AL MÉTODO QUE CONSULTA LA BD Y MUESTRA LA TABLA DE SERVICIOS
                 ListarServicios(request, response);
             }
             break;
 
             case "/Nuevo": {
+                // MUESTRA EL FORMULARIO VACÍO PARA DAR DE ALTA UN SERVICIO
                 MostrarFormularioVacio(request, response);
             }
             break;
 
             case "/Editar": {
+                // RECUPERA UN SERVICIO Y MUESTRA EL FORMULARIO CON SUS DATOS PARA MODIFICARLO
                 MostrarFormularioEditar(request, response);
             }
             break;
             default:
-                response.sendError(404,"PAGINA NO ENCONTRADA");
+                // SI LA RUTA NO EXISTE, DEVUELVE ERROR 404
+                response.sendError(404, "PAGINA NO ENCONTRADA");
         }
 
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -100,32 +79,28 @@ public class ControladorServicios extends HttpServlet {
 
         switch (pathInfo) {
             case "/Crear": {
-
+                // RECIBE DATOS DEL FORMULARIO Y CREA UN NUEVO SERVICIO EN LA BD
                 CrearServicio(request, response);
             }
             break;
 
             case "/Actualizar": {
+                // RECIBE DATOS DEL FORMULARIO Y MODIFICA UN SERVICIO EXISTENTE
                 ActualizarServicio(request, response);
             }
             break;
 
             case "/Eliminar": {
+                // ELIMINA UN SERVICIO DE LA BD
                 EliminarServicio(request, response);
             }
             break;
             default:
-                response.sendError(404,"PAGINA NO ENCONTRADA");
-                //throw new AssertionError();
+                response.sendError(404, "PAGINA NO ENCONTRADA");
         }
 
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
         return "Short description";
@@ -134,6 +109,8 @@ public class ControladorServicios extends HttpServlet {
     private void ListarServicios(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         List<SERVICIO> servicios = new ArrayList();
+
+        // CREAMOS UNA CONSULTA SQL NATIVA PARA TRAER TODOS LOS SERVICIOS
         Query consulta = em.createNativeQuery(
                 "SELECT * FROM SERVICIO", SERVICIO.class);
 
@@ -141,15 +118,19 @@ public class ControladorServicios extends HttpServlet {
 
         if (servicios != null) {
             System.out.println(" LOG --> MOSTRANDO LOS SERVICIOS");
+
+            // GUARDAMOS LA LISTA EN EL REQUEST PARA QUE EL JSP PUEDA LEERLA
             request.setAttribute("ListaServicios", servicios);
 
-            //BUSCAR QUE ES ESTO 
+            // REDIRIGIMOS A LA VISTA JSP QUE DIBUJA LA TABLA
             request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/admin_servicios.jsp").forward(request, response);
         }
     }
 
     private void MostrarFormularioVacio(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         System.out.println("  LOG --> MOSTRANDO EL FORMULARIO PARA CREAR SERVICIO");
+
+        // SIMPLEMENTE CARGA EL JSP DEL FORMULARIO SIN DATOS PREVIOS
         request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_servicio.jsp").forward(request, response);
     }
 
@@ -159,12 +140,15 @@ public class ControladorServicios extends HttpServlet {
         //NO POSEE UN ID Y EL REQUEST.GETPARAMETER DARA ERROR 
         String StringId = request.getParameter("id");
         Long id = null;
-        //String error = null ; 
 
+        // VALIDAMOS QUE EL ID NO ESTÉ VACIO
         if (StringId != null && StringId.isEmpty() == false) {
             try {
+                // CONVERTIMOS EL TEXTO A NUMERO
                 id = Long.parseLong(StringId);
             } catch (Exception e) {
+
+                // SI EL ID NO ES UN NUMERO VALIDO, VOLVEMOS AL LISTADO
                 System.out.println("NO SE HA PODIDO CONVERTIR EL ID");
                 response.sendRedirect(request.getContextPath() + "/Admin/Servicios/Listar");
             }
@@ -173,13 +157,17 @@ public class ControladorServicios extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/Admin/Servicios/Listar");
         }
 
+        // BUSCAMOS EL SERVICIO EN LA BASE DE DATOS
         SERVICIO ServicioEncontrado = em.find(SERVICIO.class, id);
 
         if (ServicioEncontrado != null) {
+            // SI EXISTE, LO GUARDAMOS EN EL REQUEST. EL JSP USARÁ ESTOS DATOS PARA RELLENAR LOS CAMPOS.
             request.setAttribute("servicio", ServicioEncontrado);
 
+            // MOSTRAMOS EL JSP DEL FORMULARIO (AHORA RELLENO)
             request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_servicio.jsp").forward(request, response);
         } else {
+            // SI NO SE ENCUENTRA EN LA BD, VOLVEMOS AL LISTADO
             response.sendRedirect(request.getContextPath() + "/Admin/Servicios/Listar");
         }
 
@@ -191,13 +179,16 @@ public class ControladorServicios extends HttpServlet {
 
         try {
 
+            // INICIAMOS LA TRANSACCIÓN
             transaccion.begin();
 
+            // RECOGEMOS LOS DATOS DEL FORMULARIO Y HACEMOS LAS CONVERSIONES NECESARIAS
             String NombreServicio = request.getParameter("NombreServicio");
             String Descripcion = request.getParameter("Descripcion");
             int Duracion = Integer.parseInt(request.getParameter("Duracion"));
             float Precio = Float.parseFloat(request.getParameter("Precio"));
 
+            // VERIFICAMOS SI YA EXISTE UN SERVICIO CON ESE NOMBRE PARA EVITAR DUPLICADOS
             Query consulta = em.createNativeQuery(
                     "SELECT * FROM SERVICIO WHERE NOMBRESERVICIO = ?", SERVICIO.class);
 
@@ -207,14 +198,19 @@ public class ControladorServicios extends HttpServlet {
 
             if (servicio_encontrado.isEmpty() == true) {
 
+                // SI NO EXISTE, CREAMOS EL OBJETO SERVICIO
                 SERVICIO servicio_a_crear = new SERVICIO(NombreServicio, Descripcion, Duracion, Precio);
 
+                // GUARDAMOS EL OBJETO
                 em.persist(servicio_a_crear);
 
+                // CONFIRMAMOS LA TRANSACCION
                 transaccion.commit();
 
                 System.out.println(" LOG --> CREANDO UN NUEVO SERVICIO");
             } else {
+
+                // SI YA EXISTE, CANCELAMOS LA TRANSACCIÓN
                 System.out.println("SERVICIO YA CREADO");
                 error = "SERVICIO YA CREADO";
                 transaccion.rollback();
@@ -229,10 +225,13 @@ public class ControladorServicios extends HttpServlet {
             }
         }
 
+        // SI HUBO ERROR, VOLVEMOS AL FORMULARIO
         if (error != null) {
             request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/formulario_servicio.jsp").forward(request, response);
             //response.sendRedirect("/formulario_servicios.jsp");
         } else {
+
+            // SI TODO SALIO BIEN, VOLVEMOS A LA LISTA
             response.sendRedirect(request.getContextPath() + "/Admin/Servicios/Listar");
         }
 
@@ -246,6 +245,7 @@ public class ControladorServicios extends HttpServlet {
         Long id = null;
         String error = null;
 
+        // VALIDAMOS EL ID
         if (StringId != null && StringId.isEmpty() == false) {
             try {
                 id = Long.parseLong(StringId);
@@ -257,23 +257,31 @@ public class ControladorServicios extends HttpServlet {
         }
 
         try {
+            // INICIAMOS TRANSACCIÓN
             transaccion.begin();
 
+            // RECOGEMOS LOS NUEVOS DATOS DEL FORMULARIO
             String NombreServicio = request.getParameter("NombreServicio");
             String Descripcion = request.getParameter("Descripcion");
             int Duracion = Integer.parseInt(request.getParameter("Duracion"));
             float Precio = Float.parseFloat(request.getParameter("Precio"));
 
+            // BUSCAMOS EL SERVICIO ORIGINAL EN LA BD
             SERVICIO servicio = em.find(SERVICIO.class, id);
 
             if (servicio != null) {
+
+                // ACTUALIZAMOS SUS PROPIEDADES CON LOS SETTERS
                 servicio.setNombreServicio(NombreServicio);
                 servicio.setDescripcion(Descripcion);
                 servicio.setDuracion(Duracion);
                 servicio.setPrecio(Precio);
 
+                // CONFIRMAMOS LOS CAMBIOS
                 transaccion.commit();
             } else {
+
+                // SI NO EXISTE EL SERVICIO, CANCELAMOS
                 transaccion.rollback();
                 error = "SERVICIO NO ENCONTRADO";
             }
@@ -288,9 +296,12 @@ public class ControladorServicios extends HttpServlet {
             }
         }
 
+        // VOLVER AL FORMULARIO CON ERROR O IR A LA LISTA
         if (error != null) {
 
             if (id != null) {
+
+                // SI FALLÓ, INTENTAMOS CARGAR EL SERVICIO ORIGINAL DE NUEVO PARA NO MOSTRAR EL FORMULARIO VAC
                 SERVICIO ServicioOriginal = em.find(SERVICIO.class, id);
                 request.setAttribute("servicio", ServicioOriginal);
             }
@@ -320,13 +331,17 @@ public class ControladorServicios extends HttpServlet {
         }
 
         try {
+
+            // INICIAMOS TRANSACCIÓN
             transaccion.begin();
 
+            // BUSCAMOS EL SERVICIO A BORRAR
             SERVICIO ServicioEliminar = em.find(SERVICIO.class, id);
 
             if (ServicioEliminar != null) {
+                // SI EXISTE, LO BORRAMOS
                 em.remove(ServicioEliminar);
-
+                // CONFIRMAMOS EL BORRADO
                 transaccion.commit();
             } else {
                 transaccion.rollback();
@@ -343,6 +358,7 @@ public class ControladorServicios extends HttpServlet {
             }
         }
 
+        // REDIRIGIMOS A LA LISTA EN CUALQUIER CASO
         if (error != null) {
             System.out.println(" ERROR. VOLVIENDO A LISTAR SERVICIOS");
             response.sendRedirect(request.getContextPath() + "/Admin/Servicios/Listar");

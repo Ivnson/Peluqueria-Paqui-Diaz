@@ -30,7 +30,7 @@
                 color: #555;
             }
             .historial-servicios-lista li::before {
-                content: '•';
+                content: '•'; 
                 color: var(--verde-agua);
                 font-weight: bold;
                 display: inline-block;

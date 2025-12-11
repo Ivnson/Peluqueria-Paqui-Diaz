@@ -4,17 +4,21 @@
     Author     : ivan
 --%>
 
+<%-- IMPORTACIONES NECESARIAS PARA MANEJAR LISTAS Y EL MODELO DE USUARIO --%>
 <%@page import="java.util.List"%>
 <%@page import="Peluqueria.modelo.USUARIO"%>
+<%-- CONFIGURACIÓN DE CODIFICACIÓN PARA CARACTERES ESPECIALES (TILDES, ETC.) --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <%-- ENLACE AL CSS EXTERNO. USAMOS '${pageContext...}' PARA OBTENER LA RUTA RAÍZ DEL PROYECTO DINÁMICAMENTE --%>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin_usuarios.css">
         <title>Peluqueria Paqui Diaz</title>
 
         <style>
+            /* ESTILOS CSS INTERNOS PARA BOTONES Y RESPONSIVIDAD */
             .btn-panel {
                 padding: 10px 18px;
                 background-color: #95a5a6; /* Color gris profesional */
@@ -43,10 +47,7 @@
             }
 
 
-            /* =========================== */
-            /* MEDIA QUERIES - RESPONSIVE  */
-            /* =========================== */
-
+            /* REGLAS PARA TABLETS Y PANTALLAS MEDIANAS */
             @media (max-width: 1024px) {
                 .container {
                     width: 95%;
@@ -68,6 +69,7 @@
                 }
             }
 
+            /* REGLAS PARA MÓVILES */
             @media (max-width: 768px) {
                 .container {
                     width: 98%;
@@ -79,15 +81,15 @@
                     font-size: 1.5rem;
                 }
 
-                /* Hacer la tabla responsive */
+                /* HACER LA TABLA RESPONSIVE CON SCROLL HORIZONTAL */
                 .table-wrapper {
                     overflow-x: auto;
                     border: 1px solid var(--gris-bordes);
-                    
+
                 }
 
                 table {
-                    min-width: 800px; /* Ancho mínimo para scroll horizontal */
+                    min-width: 800px; /* Ancho mínimo para forzar el scroll */
                 }
 
                 th, td {
@@ -127,8 +129,8 @@
                 }
             }
 
-            
 
+            /* REGLAS PARA MÓVILES MUY PEQUEÑOS */
             @media (max-width: 480px) {
                 .container {
                     padding: 10px;
@@ -154,13 +156,13 @@
                     padding: 10px 8px;
                 }
 
-                /* Ocultar columnas menos importantes en móviles */
+                /* OCULTAR COLUMNAS MENOS IMPORTANTES EN MÓVILES PEQUEÑOS */
                 @media (max-width: 400px) {
                     table {
                         min-width: 700px;
                     }
 
-                    /* Ocultar ID y Fecha de Registro en móviles muy pequeños */
+                    /* Ocultar ID y Fecha de Registro */
                     th:nth-child(1), td:nth-child(1), /* ID */
                         th:nth-child(5), td:nth-child(5) { /* Fecha de Registro */
                         display: none;
@@ -187,9 +189,11 @@
             <header>
                 <h1>Gestión de Usuarios</h1>
                 <div class="header-buttons">
+                    <%-- BOTÓN PARA VOLVER AL PANEL GENERAL --%>
                     <a href="${pageContext.request.contextPath}/Admin/Panel" class="btn-panel">
                         Volver al Panel
                     </a>
+                    <%-- BOTÓN PARA IR AL FORMULARIO DE CREAR USUARIO --%>
                     <a href="${pageContext.request.contextPath}/Admin/Usuarios/Nuevo" class="btn-crear">
                         Crear Nuevo Usuario
                     </a>
@@ -213,38 +217,54 @@
                     <tbody>
 
                         <%
+                            // --- INICIO LÓGICA JAVA ---
+
+                            // 1. RECUPERAMOS LA LISTA DE USUARIOS QUE EL SERVLET (ControladorUsuarios) NOS ENVIÓ EN EL REQUEST.
+                            // HACEMOS UN CASTING (List<USUARIO>) PORQUE EL REQUEST DEVUELVE UN OBJECT GENÉRICO.
                             List<USUARIO> usuarios = (List<USUARIO>) request.getAttribute("ListaUsuarios");
 
+                            // 2. COMPROBAMOS SI LA LISTA EXISTE Y NO ESTÁ VACÍA
                             if (usuarios != null && !usuarios.isEmpty()) {
+
+                                // 3. BUCLE FOR-EACH: RECORREMOS CADA USUARIO DE LA LISTA
                                 for (USUARIO usuario : usuarios) {
 
                         %>
+                        <%-- --- INICIO FILA DE LA TABLA (SE REPITE POR CADA USUARIO) --- --%>
                         <tr>
+                            <%-- IMPRIMIMOS LOS DATOS DEL USUARIO USANDO EXPRESIONES <%= ... %> --%>
                             <td><%= usuario.getId()%></td>
                             <td><%= usuario.getNombreCompleto()%></td>
                             <td><%= usuario.getEmail()%></td>
                             <td><%= usuario.getTelefono()%></td>
                             <td><%= usuario.getFechaRegistro()%></td>
                             <td><%= usuario.getRol()%></td>
+
+                            <%-- COLUMNA DE ACCIONES (EDITAR / BORRAR) --%>
                             <td>
+                                <%-- ENLACE EDITAR: PASAMOS EL ID POR URL (GET) PARA QUE EL SERVLET SEPA A QUIÉN EDITAR --%>
                                 <a href="${pageContext.request.contextPath}/Admin/Usuarios/Editar?id=<%= usuario.getId()%>" class="btn-editar">Editar</a>
 
+                                <%-- FORMULARIO ELIMINAR: USAMOS UN FORMULARIO (POST) PARA UNA ACCIÓN DESTRUCTIVA --%>
                                 <form action="${pageContext.request.contextPath}/Admin/Usuarios/Eliminar" method="POST" class="acciones-form">
+                                    <%-- INPUT OCULTO CON EL ID DEL USUARIO A ELIMINAR --%>
                                     <input type="hidden" name="id" value="<%= usuario.getId()%>" />
                                     <button type="submit" class="btn-eliminar">Eliminar</button>
                                 </form>
                             </td>
                         </tr>
+                        <%-- --- FIN FILA DE LA TABLA --- --%>
                         <%
-                            }
+                            } // FIN DEL BUCLE FOR
                         } else {
                         %>
+                        <%-- --- BLOQUE SI NO HAY DATOS --- --%>
                         <tr class="no-servicios">
                             <td colspan="6">No hay servicios registrados.</td>
                         </tr>
                         <%
-                            }
-                        %>
+                            } // FIN DEL IF/ELSE
+%>
                     </tbody>
                 </table>
             </div> 

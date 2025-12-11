@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+// INDICA QUE ESTE SERVLET SE EJECUTARÁ CUANDO EL USUARIO ENTRE A LA RAÍZ DE LA APLICACIÓN 
 @WebServlet(name = "ControladorIndex", urlPatterns = {""})
 public class ControladorIndex extends HttpServlet {
 
@@ -22,18 +23,25 @@ public class ControladorIndex extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            // Obtener las últimas 6 imágenes de la galería para el carrusel
+
+            // 1. PREPARAR LA CONSULTA A LA BASE DE DATOS
+            // USAMOS TYPEDQUERY PARA OBTENER OBJETOS DE TIPO GALERIA
+            // ORDENAMOS POR ID DESCENDENTE PARA QUE SALGAN PRIMERO LAS FOTOS MÁS NUEVAS
             TypedQuery<GALERIA> q = em.createQuery(
                     "SELECT g FROM GALERIA g ORDER BY g.id DESC", GALERIA.class);
-            //q.setMaxResults(6);
+
+            // 2. EJECUTAR LA CONSULTA Y GUARDAR EL RESULTADO EN UNA LISTA
             List<GALERIA> imagenesGaleria = q.getResultList();
 
+            // 3. PASAR DATOS A LA VISTA (JSP)
+            // GUARDAMOS LA LISTA EN EL OBJETO REQUEST CON EL NOMBRE imagenesGaleria
             request.setAttribute("imagenesGaleria", imagenesGaleria);
+
             request.getRequestDispatcher("/index.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();
-            // Si hay error, igual cargar el index sin imágenes
+            // AUNQUE FALLE LA CARGA DE IMÁGENES, INTENTAMOS MOSTRAR LA PÁGINA DE INICIO IGUALMENTE
             request.getRequestDispatcher("/index.jsp").forward(request, response);
         }
     }

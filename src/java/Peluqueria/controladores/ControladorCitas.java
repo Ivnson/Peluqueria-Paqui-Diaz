@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package Peluqueria.controladores;
 
 import Peluqueria.modelo.CITA;
@@ -27,22 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- * @author ivan
- */
 @WebServlet(name = "ControladorCitas", urlPatterns = {"/Admin/Citas/*"})
 public class ControladorCitas extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @PersistenceContext(unitName = "PeluqueriaPaquiPU")
     private EntityManager em;//GESTOR DE ENTIDADES
 
@@ -54,54 +37,43 @@ public class ControladorCitas extends HttpServlet {
 
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // OBTENEMOS LA PARTE FINAL DE LA URL /LISTAR, /NUEVO...
         String pathInfo = request.getPathInfo();
 
+        // SI NO HAY RUTA, POR DEFECTO VAMOS A LISTAR
         if (pathInfo == null || pathInfo.equals("/")) {
             pathInfo = "/Listar";
         }
 
+        // ENRUTADOR PRINCIPAL
         switch (pathInfo) {
             case "/Listar": {
-
+                // LLAMA A LA LÓGICA PARA MOSTRAR LA TABLA DE CITAS
                 ListarCitas(request, response);
             }
             break;
 
             case "/Nuevo": {
+                // MUESTRA EL FORMULARIO VACÍO PARA AGENDAR UNA CITA
                 MostrarFormularioVacio(request, response);
             }
             break;
 
             case "/Editar": {
+                // MUESTRA EL FORMULARIO CON LOS DATOS DE UNA CITA EXISTENTE PARA MODIFICARLA
                 MostrarFormularioEditar(request, response);
             }
             break;
             default:
+                // SI LA RUTA NO ES VÁLIDA, ERROR 404
                 response.sendError(404, "PAGINA NO ENCONTRADA");
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -110,17 +82,19 @@ public class ControladorCitas extends HttpServlet {
 
         switch (pathInfo) {
             case "/Crear": {
-
+                // PROCESA EL FORMULARIO PARA GUARDAR UNA NUEVA CITA
                 CrearCita(request, response);
             }
             break;
 
             case "/Actualizar": {
+                // GUARDA LOS CAMBIOS DE UNA CITA EXISTENTE
                 ActualizarCita(request, response);
             }
             break;
 
             case "/Eliminar": {
+                // ELIMINA UNA CITA DE LA BASE DE DATOS
                 EliminarCita(request, response);
             }
             break;
@@ -131,23 +105,18 @@ public class ControladorCitas extends HttpServlet {
 
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 
     private void ListarCitas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         List<CITA> citas = new ArrayList();
 
-        // "SELECT c FROM CITA c" -> Selecciona todas las entidades CITA.
-        // "LEFT JOIN FETCH c.usuario" -> En la misma consulta, trae el objeto USUARIO.
-        // "LEFT JOIN FETCH c.serviciosSet" -> En la misma consulta, trae el Set de SERVICIOS.
+        // SELECT DISTINCT c... -> EVITA DUPLICADOS SI HAY MULTIPLES SERVICIOS
+        // LEFT JOIN FETCH c.usuario -> CARGA AL USUARIO DE GOLPE (EVITA CONSULTAS ADICIONALES)
+        // LEFT JOIN FETCH c.serviciosSet -> CARGA LOS SERVICIOS DE GOLPE
         Query consulta = em.createQuery(
                 "SELECT DISTINCT c FROM CITA c LEFT JOIN FETCH c.usuario LEFT JOIN FETCH c.serviciosSet", CITA.class);
 
@@ -155,8 +124,11 @@ public class ControladorCitas extends HttpServlet {
 
         if (citas != null) {
             System.out.println(" LOG --> MOSTRANDO LAS CITAS");
+
+            // PASAMOS LA LISTA A LA VISTA
             request.setAttribute("listaCitas", citas);
 
+            // REDIRIGIMOS AL JSP DE ADMINISTRACIÓN DE CITAS
             request.getRequestDispatcher("/WEB-INF/Peluqueria.Vista/ADMIN/admin_citas.jsp").forward(request, response);
         }
     }
@@ -169,7 +141,7 @@ public class ControladorCitas extends HttpServlet {
 
         List<SERVICIO> servicios = consulta1.getResultList();
 
-        //CONSULTA PARA TRAER A TODOS LOS CLIENTES CON ROL Cliente
+        //CONSULTA PARA TRAER A TODOS LOS USUARIOS
         Query consulta2 = em.createNativeQuery(
                 "SELECT * FROM USUARIOS", USUARIO.class);
         //consulta2.setParameter(1, "Cliente");
@@ -188,6 +160,7 @@ public class ControladorCitas extends HttpServlet {
         Long id = null;
         String idString = request.getParameter("id");
 
+        // VALIDACIÓN DEL ID RECIBIDO
         if (idString != null && idString.isEmpty() == false) {
             try {
                 id = Long.parseLong(idString);
@@ -199,6 +172,7 @@ public class ControladorCitas extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/Admin/Citas/Listar");
         }
 
+        // BUSCAMOS LA CITA QUE QUEREMOS EDITAR
         CITA CitaEncontrada = em.find(CITA.class, id);
 
         if (CitaEncontrada != null) {
@@ -208,7 +182,7 @@ public class ControladorCitas extends HttpServlet {
 
             List<SERVICIO> servicios = consulta1.getResultList();
 
-            //CONSULTA PARA TRAER A TODOS LOS CLIENTES CON ROL Cliente
+            //CONSULTA PARA TRAER A TODOS LOS USUARIOS
             Query consulta2 = em.createNativeQuery(
                     "SELECT * FROM USUARIOS", USUARIO.class);
             //consulta2.setParameter("rol", "Cliente");
@@ -231,13 +205,14 @@ public class ControladorCitas extends HttpServlet {
         try {
             System.out.println("=== INICIANDO CREACIÓN DE CITA ===");
 
+            // RECOGIDA Y CONVERSIÓN DE DATOS DEL FORMULARIO
             Long UsuarioID = Long.parseLong(request.getParameter("usuarioID"));
             LocalDate Fecha = LocalDate.parse(request.getParameter("fecha"));
             LocalTime HoraInicio = LocalTime.parse(request.getParameter("HoraInicio"));
 
             System.out.println("Datos recibidos - UsuarioID: " + UsuarioID + ", Fecha: " + Fecha + ", Hora: " + HoraInicio);
 
-            // Verificar servicios seleccionados
+            // RECOGER LOS IDs DE LOS SERVICIOS SELECCIONADOS (ARRAY DE STRINGS)
             String[] Ids_de_servicios = request.getParameterValues("serviciosIds");
             if (Ids_de_servicios == null || Ids_de_servicios.length == 0) {
                 error = "Debe seleccionar al menos un servicio.";
@@ -246,11 +221,13 @@ public class ControladorCitas extends HttpServlet {
 
             System.out.println("Servicios seleccionados: " + java.util.Arrays.toString(Ids_de_servicios));
 
+            // INICIO DE LA TRANSACCIÓN
             transaccion.begin();
             System.out.println("Transacción iniciada");
 
+            // BÚSQUEDA DEL USUARIO
             USUARIO usuario = em.find(USUARIO.class, UsuarioID);
-            System.out.println("Usuario encontrado: " + (usuario != null ? usuario.getNombreCompleto() : "NULL"));
+            System.out.println("Usuario encontrado: " + usuario.getNombreCompleto());
 
             if (usuario == null) {
                 error = "Usuario no encontrado.";
@@ -258,15 +235,25 @@ public class ControladorCitas extends HttpServlet {
                 throw new Exception(error);
             }
 
-            // Verificar cita existente
+            // COMPROBAMOS SI EL USUARIO YA TIENE UNA CITA ASIGNADA
             CITA cita_antigua = usuario.getCita();
-            System.out.println("Cita existente: " + (cita_antigua != null ? "SÍ (ID: " + cita_antigua.getId() + ", Fecha: " + cita_antigua.getFecha() + ")" : "NO"));
+            String mensaje;
+            if (cita_antigua != null) {
+                mensaje = "SÍ (ID: " + cita_antigua.getId() + ", Fecha: " + cita_antigua.getFecha() + ")";
+            } else {
+                mensaje = "NO";
+            }
+            System.out.println("Cita existente: " + mensaje);
 
             if (cita_antigua != null) {
+
+                // SI TIENE CITA, COMPROBAMOS SI ES VIEJA (FECHA PASADA)
                 boolean estaExpirada = cita_antigua.getFecha().isBefore(LocalDate.now());
                 System.out.println("Cita expirada: " + estaExpirada);
 
                 if (estaExpirada) {
+
+                    // SI ES VIEJA, LA ARCHIVAMOS EN LA TABLA HISTORIAL_CITA
                     System.out.println("ARCHIVANDO CITA EXPIRADA...");
 
                     HISTORIAL_CITA cita_guardada = new HISTORIAL_CITA(
@@ -276,24 +263,28 @@ public class ControladorCitas extends HttpServlet {
                             cita_antigua.getServiciosSet()
                     );
 
+                    // GUARDAMOS EN HISTORIAL
                     em.persist(cita_guardada);
                     System.out.println("Cita archivada en historial");
 
+                    // BORRAMOS DE LA TABLA DE CITAS ACTIVAS
                     em.remove(cita_antigua);
                     System.out.println("Cita antigua eliminada");
 
-                    // IMPORTANTE: Limpiar la referencia en el usuario
+                    // ROMPEMOS LA RELACIÓN EN EL OBJETO USUARIO
                     usuario.setCita(null);
                     em.merge(usuario);
                     System.out.println("Referencia de cita limpiada en usuario");
                 } else {
+
+                    // SI LA CITA ES FUTURA, NO DEJAMOS CREAR OTRA
                     error = "El usuario ya tiene una cita activa para el " + cita_antigua.getFecha();
                     transaccion.rollback();
                     throw new Exception(error);
                 }
             }
 
-            // Crear Set de servicios
+            // ASOCIACIÓN DE SERVICIOS , CREAR EL SET 
             Set<SERVICIO> ServiciosParaCita = new HashSet<>();
             for (String IdServicio : Ids_de_servicios) {
                 Long id = Long.parseLong(IdServicio);
@@ -313,9 +304,11 @@ public class ControladorCitas extends HttpServlet {
 
             System.out.println("Servicios para la cita: " + ServiciosParaCita.size());
 
-            // PEGA ESTO justo antes de crear la cita en el administrador:
+            // VERIFICACIÓN DE DISPONIBILIDAD
             System.out.println("=== VERIFICANDO DISPONIBILIDAD (ADMIN) ===");
             try {
+
+                // CONSULTAMOS SI YA HAY OTRA CITA ESE DÍA A ESA HORA
                 TypedQuery<Long> disponibilidadQuery = em.createQuery(
                         "SELECT COUNT(c) FROM CITA c WHERE c.fecha = :fecha AND c.horaInicio = :horaInicio",
                         Long.class
@@ -326,6 +319,7 @@ public class ControladorCitas extends HttpServlet {
                 Long citasExistentes = disponibilidadQuery.getSingleResult();
                 System.out.println("Citas existentes en " + Fecha + " a las " + HoraInicio + ": " + citasExistentes);
 
+                // SI EL CONTADOR ES MAYOR QUE 0, EL HUECO ESTÁ OCUPADO
                 if (citasExistentes > 0) {
                     error = "Ya existe una cita programada para el " + Fecha + " a las " + HoraInicio
                             + ". Por favor, selecciona otra fecha u hora.";
@@ -333,21 +327,28 @@ public class ControladorCitas extends HttpServlet {
                 }
             } catch (Exception e) {
                 System.err.println("Error al verificar disponibilidad: " + e.getMessage());
+
+                // LANZAMOS EL ERROR PARA QUE LO CAPTURE EL CATCH PRINCIPAL
                 throw e;
             }
 
-            // Crear nueva cita
+            // GUARDADO FINAL
+            // CREAMOS EL OBJETO CITA
             CITA NuevaCita = new CITA(Fecha, HoraInicio, usuario);
+
+            // ASIGNAMOS LOS SERVICIOS
             NuevaCita.setServiciosSet(ServiciosParaCita);
 
             System.out.println("Persistiendo nueva cita...");
+            // GUARDAMOS EN BD
             em.persist(NuevaCita);
 
-            // Actualizar la referencia en el usuario
+            // ACTUALIZAMOS AL USUARIO CON SU NUEVA CITA
             usuario.setCita(NuevaCita);
             em.merge(usuario);
 
             System.out.println("Haciendo commit...");
+            // CONFIRMAMOS LA TRANSACCIÓN
             transaccion.commit();
             System.out.println("=== CITA CREADA EXITOSAMENTE ===");
 
@@ -361,7 +362,9 @@ public class ControladorCitas extends HttpServlet {
                 error = "Error al crear la cita: " + e.getMessage();
             }
 
+            // INTENTAMOS DESHACER LA TRANSACCIÓN SI FALLÓ ALGO
             try {
+                // SI EL ESTADO DE LA TRANSACCION SIGUE ACTIVO ENTONCES SE HACE ROLLBACK
                 if (transaccion.getStatus() == jakarta.transaction.Status.STATUS_ACTIVE) {
                     System.err.println("Haciendo rollback...");
                     transaccion.rollback();
@@ -371,11 +374,10 @@ public class ControladorCitas extends HttpServlet {
             }
         }
 
-        // Resto del código para manejar el resultado...
         if (error != null) {
             System.err.println("Redirigiendo con error: " + error);
 
-            // Recargar datos para el formulario
+            // SI HUBO ERROR, RECARGAMOS LOS DATOS Y VOLVEMOS AL FORMULARIO
             try {
                 Query consultaClientes = em.createNativeQuery(
                         "SELECT * FROM USUARIOS WHERE ROL = ?", USUARIO.class);
@@ -405,6 +407,7 @@ public class ControladorCitas extends HttpServlet {
         Long id = null;
         String error = null;
 
+        // VALIDAMOS EL ID
         if (StringId != null && StringId.isEmpty() == false) {
             try {
                 id = Long.parseLong(StringId);
@@ -417,6 +420,7 @@ public class ControladorCitas extends HttpServlet {
 
         try {
 
+            // RECOGEMOS LOS NUEVOS DATOS DEL FORMULARIO
             Long UsuarioID = Long.parseLong(request.getParameter("usuarioID"));
             LocalDate Fecha = LocalDate.parse(request.getParameter("fecha"));
             LocalTime HoraInicio = LocalTime.parse(request.getParameter("HoraInicio"));
@@ -428,8 +432,10 @@ public class ControladorCitas extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/Admin/Citas/Listar");
             }
 
+            // INICIAMOS TRANSACCIÓN
             transaccion.begin();
 
+            // BUSCAMOS LA CITA Y EL USUARIO EN LA BD
             CITA CitaEditar = em.find(CITA.class, id);
 
             if (CitaEditar == null) {
@@ -452,6 +458,7 @@ public class ControladorCitas extends HttpServlet {
             //BORRAMOS LOS SERVICIOS ANTIGUOS PARA PONER LOS NUEVOS 
             CitaEditar.getServiciosSet().clear();
 
+            // AÑADIMOS LOS NUEVOS SERVICIOS SELECCIONADOS
             for (String idServicios : Ids_de_servicios) {
                 SERVICIO servicio = em.find(SERVICIO.class, Long.parseLong(idServicios));
 
@@ -460,6 +467,7 @@ public class ControladorCitas extends HttpServlet {
                 }
             }
 
+            // CONFIRMAMOS LOS CAMBIOS
             transaccion.commit();
 
         } catch (Exception e) {
@@ -480,7 +488,7 @@ public class ControladorCitas extends HttpServlet {
 
             List<SERVICIO> servicios = consulta1.getResultList();
 
-            //CONSULTA PARA TRAER A TODOS LOS CLIENTES CON ROL Cliente
+            //CONSULTA PARA TRAER A TODOS LOS USUARIOS
             Query consulta2 = em.createNativeQuery(
                     "SELECT * FROM USUARIOS", USUARIO.class);
             //consulta2.setParameter(1, "Cliente");
@@ -543,6 +551,7 @@ public class ControladorCitas extends HttpServlet {
             }
         }
 
+        // REDIRIGIMOS SIEMPRE AL LISTADO --> CODIGO REDUNDANTE :/ AHORA LO MODIFICO
         if (error != null) {
             System.out.println(" ERROR. VOLVIENDO A LISTAR CITAS");
             response.sendRedirect(request.getContextPath() + "/Admin/Citas/Listar");
@@ -550,32 +559,4 @@ public class ControladorCitas extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/Admin/Citas/Listar");
         }
     }
-
-    /*
-
-    private List<CITA> ObtenerCitaConDatos() {
-        //OBTENER TODAS LAS CITAS 
-        List<CITA> citas = em.createNativeQuery("SELECT * FROM CITA", CITA.class).getResultList();
-
-        //OBETENER LOS USUARIOS
-        for (int i = 0; i < citas.size(); i++) {
-
-            if (citas.get(i).getUsuario() != null) {
-                citas.get(i).getUsuario();
-            }
-        }
-
-        //OBTENER LOS SERVICIOS
-        for (int i = 0; i < citas.size(); i++) {
-
-            if (citas.get(i).getServiciosSet() != null) {
-                citas.get(i).getServiciosSet();
-            }
-        }
-
-        return citas;
-
-    }
-
-     */
 }
